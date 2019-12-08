@@ -1,39 +1,25 @@
+/*
+	Define the global virables and consts
+*/
+
 #pragma once
 
 #include "five_type.h"
 
 extern uint8_t player;
-extern int Round;
+extern uint8_t Round;
 extern Board board;
 
-const uint8_t dx[4] = { 1,0,-1,1 };
-const uint8_t dy[4] = { 0,1,1,1 };
-const uint8_t direction[2] = { 1,-1 };
-const uint8_t* symbol[] = { "¡ñ","¡ð","¡ø","¡÷","©° ","©Ð ","©´ ","©À ","©à ","©È ","©¸ ","©Ø ","©¼ " };
+extern const uint8_t dx[4];
+extern const uint8_t dy[4];
+extern const uint8_t direction[2];
+extern const uint32_t scoreboard[512];
 
+extern const uint8_t* symbol[];
 enum SYMBOL {
 	BP = 0, WP, BT, WT, TL, TC, TR, ML, MC, MR, BL, BC, BR
 };
+extern const Board empty;
 
-/*
-enum CASES {
-};
-*/
-
-const Board empty = {
-		{TL, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{ML, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MC, MR}, \
-		{BL, BC, BC, BC, BC, BC, BC, BC, BC, BC, BC, BC, BC, BC, BR}
-};
+extern void(*Play[])(Point(*P1)(), Point(*P2)());
+extern Point(*Input[])();

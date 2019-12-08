@@ -1,9 +1,11 @@
+/*
+	Ask the user to give a valid input.
+*/
+
 #include <stdio.h>
 #include "five_global.h"
 
-extern void print_board();
-
-char user()
+Point user()
 {
 	char x, y, tmpx, tmpn;
 	int tmpy;
@@ -11,16 +13,11 @@ char user()
 	scanf_s("%c%d%c", &tmpx, 1, &tmpy, &tmpn, 1);
 	x = 15 - tmpy;
 	y = tmpx - 'a';
-
-	if (!varify_location(x, y)) {
-		printf("Do you want to place your piece out of the board?\n");
-		printf("Don't do this please\n");
+	Point P = { x,y };
+	if (!varify_location(P)||board[P.x][P.y]<2) {
+		printf("You can't put your piece there!\n");
+		printf("Choose another place:\n");
 		return user();
 	}
-	if (board[x][y] <= 1) {
-		printf("This position has been taken, you can't put you piece there.\n");
-		printf("Choose another place.\n");
-		return user();
-	}
-	return drop(x, y);
+	return P;
 }

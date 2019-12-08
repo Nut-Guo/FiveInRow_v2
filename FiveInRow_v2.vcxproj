@@ -123,8 +123,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="evaluate.c" />
+    <ClCompile Include="const.c" />
+    <ClCompile Include="evl.c" />
+    <ClCompile Include="lookup.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="pc_easy.c" />
     <ClCompile Include="play.c" />
     <ClCompile Include="user.c" />
   </ItemGroup>

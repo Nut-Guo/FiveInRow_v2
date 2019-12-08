@@ -1,4 +1,9 @@
+/*
+	Define main types.
+*/
+
 #pragma once
+
 #include<stdint.h>
 
 typedef struct {

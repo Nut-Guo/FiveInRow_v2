@@ -1,15 +1,23 @@
+/*
+	Declare the functions
+*/
 #pragma once
 
-char pc();
+#include "five_type.h"
 
-char user();
+uint8_t varify_location(Point p);
 
-char(*Input[])() = { user, pc};
+//uint16_t evaluate(pieceid id);
 
-void play(char (*P1)(), char (*P2)());
+//pieceid lookup(Point p, uint8_t color);
 
-void new_game(char(*P1)(), char(*P2)());
+Point choose();
 
-void continue_game(char(*P1)(), char(*P2)());
+Point user();
 
-void(*Play[])(char (*P1)(), char (*P2)()) = { new_game, continue_game };
+void play(Point (*P1)(Point last), Point (*P2)(Point last));
+
+void new_game(Point(*P1)(Point last), Point(*P2)(Point last));
+
+void continue_game(Point(*P1)(Point last), Point(*P2)(Point last));
+

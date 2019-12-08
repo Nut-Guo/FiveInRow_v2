@@ -14,4 +14,38 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="play.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="user.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lookup.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="evl.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pc_easy.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="const.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="five_func.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="five_global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="five_type.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
