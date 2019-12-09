@@ -104,6 +104,7 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 				break;
 		}
 		player ^= 1;
+		Round++;
 	}
 	if (Round == 225 && !stop)
 		printf("Draw!\n");

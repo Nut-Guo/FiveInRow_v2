@@ -128,6 +128,8 @@
     <ClCompile Include="lookup.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="pc_easy.c" />
+    <ClCompile Include="pc_hard.c" />
+    <ClCompile Include="pc_harder.c" />
     <ClCompile Include="play.c" />
     <ClCompile Include="user.c" />
   </ItemGroup>

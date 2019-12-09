@@ -36,6 +36,12 @@
     <ClCompile Include="const.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="pc_hard.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pc_harder.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="five_func.h">

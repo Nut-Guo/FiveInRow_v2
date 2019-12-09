@@ -11,9 +11,11 @@ uint8_t varify_location(Point p);
 
 //pieceid lookup(Point p, uint8_t color);
 
-Point choose();
+Point choose(Point last);
 
-Point user();
+Point user(Point last);
+
+Point choose_indepth(Point last);
 
 void play(Point (*P1)(Point last), Point (*P2)(Point last));
 

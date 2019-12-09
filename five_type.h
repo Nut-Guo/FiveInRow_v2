@@ -13,6 +13,8 @@ typedef struct {
 
 typedef uint8_t Board[15][15];
 
+typedef Point POOL[225];
+
 /*
 typedef struct Piece {
 	char x;
