@@ -2,17 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
+#include <io.h>
 #include "five_type.h"
 #include "five_global.h"
 #include "five_func.h"
 
+extern char cwd[80];
 uint8_t player = 0;
 uint8_t Round = 0;
 uint8_t stop = 0;
 Board board;
-Point PieceOnBoard[225];
+POOL PieceOnBoard;
 
-extern uint8_t check(Point p, uint8_t color);
+extern uint8_t check(Point p, uint8_t color, Board local_board);
+extern void print_record();
 /*Print the board and the present state.*/
 void print_board()
 {
@@ -22,42 +25,25 @@ void print_board()
 		printf("%2d", 15 - i);
 		for (int j = 0; j <= 14; j++)
 		{
-			printf("%s", symbol[board[i][j]]);
+			printf("%s", symbol[board.location[i][j]]);
 		}
 		putchar('\n');
 	}
 	printf("   A B C D E F G H I J K L M N O \n");
 }
 
-/*Print the record after the game.*/
-/*
-void print_record() {
-	record();
-	printf("Round Player1 Player2\n");
-	for (int i = 0; i < Round; i++) {
-		if (!(i % 2))
-			printf("%4d ", i / 2 + 1);
-		printf("%4c%-4d", (PieceOnBoard[i]).y + 'a', 15 - (PieceOnBoard[i]).x);
-		if (i % 2)
-			putchar('\n');
-	}
-	printf("\nPress (q) to quit or anything else to play again.\n");
-	if (_getch() == 'q')
-		exit(0);
-}
-*/
-
 /*Init the board for the next game.*/
 void init_board()
 {
 	player = 0;
 	Round = 0;
-	memcpy(board, empty, sizeof(empty));
+	stop = 0;
+	board = empty;
 	print_board();
 }
 
 /*Varify the location*/
-uint8_t varify_location(Point p)
+uint8_t verify_location(Point p)
 {
 	if (p.x >= 0 && p.x <= 14 && p.y >= 0 && p.y <= 14)
 		return 1;
@@ -67,11 +53,12 @@ uint8_t varify_location(Point p)
 /*Drop the piece at the given place.*/
 uint8_t drop(Point P)
 {
-	board[P.x][P.y] = player + 2;
+	board.location[P.x][P.y] = player + 2;
 	print_board();
 	printf("Last piece:%c %d\n", P.y + 'a', 15 - P.x);
-	board[P.x][P.y] = player;
-	return check(P,player);
+	board.location[P.x][P.y] = player;
+	PieceOnBoard.record[Round++] = P;
+	return check(P,player,board);
 }
 
 /*Set the initial state and start the game.*/
@@ -104,7 +91,6 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 				break;
 		}
 		player ^= 1;
-		Round++;
 	}
 	if (Round == 225 && !stop)
 		printf("Draw!\n");
@@ -117,11 +103,9 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 	case 'q':
 		exit(0);
 		break;
-	/*
 	case 'r':
 		print_record();
 		break;
-	*/
 	default:
 		break;
 	}

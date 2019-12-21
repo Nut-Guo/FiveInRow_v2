@@ -24,22 +24,22 @@
     <ClCompile Include="user.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="lookup.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="evl.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="pc_easy.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="const.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="pc_hard.c">
+    <ClCompile Include="getvec.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="pc_harder.c">
+    <ClCompile Include="sortpool.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pc_search.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="record.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

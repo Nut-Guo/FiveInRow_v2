@@ -1,7 +1,7 @@
 /*
 	stupid version that tries to find the most valuable position.
 */
-
+/*
 #include "five_func.h"
 #include "five_global.h"
 #include "five_type.h"
@@ -34,3 +34,4 @@ typedef struct {
 	uint8_t color;
 	uint8_t psp;
 }Search_Unit;
+*/

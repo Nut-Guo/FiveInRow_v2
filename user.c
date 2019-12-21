@@ -6,7 +6,7 @@
 #include "five_global.h"
 #include "five_type.h"
 
-extern uint8_t varify_location(Point p);
+extern uint8_t verify_location(Point p);
 
 Point user(Point last)
 {
@@ -17,7 +17,7 @@ Point user(Point last)
 	x = 15 - tmpy;
 	y = tmpx - 'a';
 	Point P = { x,y };
-	if (!varify_location(P)||board[P.x][P.y]<2) {
+	if (!verify_location(P)||board.location[P.x][P.y]<2) {
 		printf("You can't put your piece there!\n");
 		printf("Choose another place:\n");
 		return user(last);

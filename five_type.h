@@ -11,9 +11,13 @@ typedef struct {
 	uint8_t y;
 }Point;
 
-typedef uint8_t Board[15][15];
+typedef struct {
+	uint8_t location[15][15];
+}Board;
 
-typedef Point POOL[225];
+typedef struct {
+	Point record[225];
+}POOL;
 
 /*
 typedef struct Piece {

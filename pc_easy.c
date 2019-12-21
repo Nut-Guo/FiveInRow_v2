@@ -1,8 +1,7 @@
 /*
 	stupid version that tries to find the most valuable position.
 */
-
-#include "five_func.h"
+/*
 #include "five_global.h"
 #include "five_type.h"
 
@@ -36,3 +35,4 @@ Point choose(Point last) {
 	add2pool(goodP, easypool, &easypsp, easyvec);
 	return goodP;
 }
+*/
