@@ -7,7 +7,7 @@
 
 Board empty_surroundings = { {0} };
 typedef struct {
-	uint8_t form[5];
+	uint8_t form[6];
 }disvec;
 
 extern disvec getvec(Point p, uint8_t color, Board *local_board);
@@ -16,15 +16,64 @@ extern uint8_t verify_location(Point p);
 
 uint8_t poolcnt = 0;
 
+
+uint8_t check_ban(disvec vec, uint8_t color) {
+	if (!color) {
+		for (uint8_t i = 3; i < 6; i++) {
+			if (!vec.form[i]) return 1;
+		}
+	}
+	else {
+		if (!vec.form[5]) return 1;
+	}
+	return 0;
+}
+
+/*Check if the game should stop*/
+uint8_t check(Point p, uint8_t color, Board* local_board) {
+	for (uint8_t i = 0; i < Round; i++) {
+		if (board.location[PieceOnBoard.record[i].x][PieceOnBoard.record[i].y] == color) {
+			disvec tmpvec = getvec(PieceOnBoard.record[i], color, local_board);
+			if (check_ban(tmpvec, color)) {
+				printf("Ban triggered!");
+				player = !player;
+				return 1;
+			}
+			if (tmpvec.form[0] == 1) return 1;
+		}
+	};
+	return 0;
+}
+
+uint8_t check_win(Point p, uint8_t color, Board* local_board) {
+	disvec vec = getvec(p, color, local_board);
+	if (check_ban(vec, color)) {
+		return 10;
+	};
+	for (uint8_t i = 0; i < 3; i++) {
+		if (vec.form[i] == 0) {
+			return i + 1;
+		}
+	}
+	if (color)
+	{
+		if (vec.form[3] == 0) return 4;
+		if (vec.form[4] == 0) return 5;
+	}
+	return 0;
+}
+
 inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	Board surroundings = empty_surroundings;
 	for (uint8_t k = 0; k < localRound; k++) {
 		Point p = (*PieceOnBoard).record[k];
-		Point tmpp;
 		for (uint8_t i = 0; i < 4; i++) {
 			for (uint8_t j = 0; j < 2; j++) {
-				tmpp = move(p, i, j);
-				if(verify_location(tmpp) && (*local_board).location[tmpp.x][tmpp.y] > 2)surroundings.location[tmpp.x][tmpp.y] = 1;
+				Point tmpp = p;
+				for (uint8_t k = 0; k < 2; k++) {
+					tmpp = move(tmpp, i, j);
+					if (verify_location(tmpp) && (*local_board).location[tmpp.x][tmpp.y] > 2)surroundings.location[tmpp.x][tmpp.y] = 1;
+				}
 			}
 		}
 	}
@@ -33,6 +82,7 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 
 inline int32_t get_value(Point p, uint8_t color, Board *local_board) {
 	disvec vec = getvec(p, color, local_board);
+	if (check_ban(vec, color))return 0;
 	int32_t value = 0;
 	value += vec.form[0] < 5 ? 1 << ((5 - vec.form[0]) * 3) : 0;
 	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[0]) * 3) : 0;
@@ -80,14 +130,4 @@ int32_t evaluate(uint8_t color, POOL *pool, Board *local_board) {
 	}
 	*/
 	return value;
-}
-
-uint8_t check_win(Point p, uint8_t color, Board *local_board) {
-	disvec vec = getvec(p, color, local_board);
-	for (uint8_t i = 0; i < 5; i++) {
-		if (vec.form[i] == 0) {
-			return i + 1;
-		}
-	}
-	return 0;
 }
