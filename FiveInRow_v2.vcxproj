@@ -123,6 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="hash.c" />
     <ClCompile Include="pc_search.c" />
     <ClCompile Include="record.c" />
     <ClCompile Include="sortpool.c" />

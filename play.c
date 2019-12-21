@@ -14,8 +14,10 @@ uint8_t stop = 0;
 Board board;
 POOL PieceOnBoard;
 
-extern uint8_t check(Point p, uint8_t color, Board local_board);
+extern uint8_t check(Point p, uint8_t color, Board *local_board);
 extern void print_record();
+extern void init_zobrist();
+
 /*Print the board and the present state.*/
 void print_board()
 {
@@ -40,6 +42,7 @@ void init_board()
 	stop = 0;
 	board = empty;
 	print_board();
+	init_zobrist();
 }
 
 /*Varify the location*/
@@ -58,7 +61,7 @@ uint8_t drop(Point P)
 	printf("Last piece:%c %d\n", P.y + 'a', 15 - P.x);
 	board.location[P.x][P.y] = player;
 	PieceOnBoard.record[Round++] = P;
-	return check(P,player,board);
+	return check(P,player,&board);
 }
 
 /*Set the initial state and start the game.*/

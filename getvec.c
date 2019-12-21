@@ -171,11 +171,11 @@ inline Point move(Point p, uint8_t i, uint8_t j) {
 }
 
 // look up the end in one direction.
-Point get_end(Point p, uint8_t i, uint8_t j, uint8_t color, Board local_board) {// look up the end in one direction.
+Point get_end(Point p, uint8_t i, uint8_t j, uint8_t color, Board *local_board) {// look up the end in one direction.
 	Point end = p;
 	Point tmpp = move(p, i, j);
 	uint8_t len = 1;
-	while (verify_location(tmpp) && (local_board.location[tmpp.x][tmpp.y] == color || local_board.location[tmpp.x][tmpp.y] > 3) && len < 5) {
+	while (verify_location(tmpp) && ((*local_board).location[tmpp.x][tmpp.y] == color || (*local_board).location[tmpp.x][tmpp.y] > 3) && len < 5) {
 		end = tmpp;
 		++len;
 		tmpp = move(tmpp, i, j);
@@ -188,32 +188,32 @@ inline uint8_t comaprepoint(Point A, Point B) {
 }
 
 // parse the line with the specified ends
-uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board local_board) {
+uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board *local_board) {
 	Point tmpp = start;
 	uint16_t id = 1;
 	while (!comaprepoint(tmpp, end)) {
-		id = (id << 1) + (local_board.location[tmpp.x][tmpp.y] == color);
+		id = (id << 1) + ((*local_board).location[tmpp.x][tmpp.y] == color);
 		tmpp = move(tmpp, d, 1);
 	}
-	id = (id << 1) + (local_board.location[tmpp.x][tmpp.y] == color);
+	id = (id << 1) + ((*local_board).location[tmpp.x][tmpp.y] == color);
 	return id;
 }
 
 //The function that calls the former ones that to get the id.
-pieceid lookup(Point p, uint8_t color, Board local_board) {
-	uint8_t save = local_board.location[p.x][p.y];
-	local_board.location[p.x][p.y] = color;
+pieceid lookup(Point p, uint8_t color, Board *local_board) {
+	uint8_t save = (*local_board).location[p.x][p.y];
+	(*local_board).location[p.x][p.y] = color;
 	pieceid id = {0};
 	for (uint8_t i = 0; i < 4; i++) {// look up in the four directions;
 		Point end[2] = { get_end(p, i, 0, color, local_board), get_end(p, i, 1, color,local_board) };
 		id.id[i] = parse_line(end[0], end[1], i, color,local_board);
 	}
-	local_board.location[p.x][p.y] = save;
+	(*local_board).location[p.x][p.y] = save;
 	return id;
 }
 
 //Translate id 2 distance
-distance id2dis(Point p, uint8_t color, Board local_board) {
+distance id2dis(Point p, uint8_t color, Board *local_board) {
 	pieceid id = lookup(p, color,local_board);
 	distance dis;
 	for (uint8_t i = 0; i < 4; i++) {
@@ -227,7 +227,7 @@ inline uint8_t min(uint8_t x, uint8_t y) {
 	return x < y ? x : y;
 }
 
-disvec getvec(Point p, uint8_t color, Board local_board) {
+disvec getvec(Point p, uint8_t color, Board *local_board) {
 	distance dis = id2dis(p,color,local_board);
 	disvec vec;
 	//sort the dis;
@@ -264,7 +264,7 @@ disvec getvec(Point p, uint8_t color, Board local_board) {
 }
 
 /*Check if the game should stop*/
-uint8_t check(Point p, uint8_t color,Board local_board) {
+uint8_t check(Point p, uint8_t color,Board *local_board) {
 	disvec mydis = getvec(p, color,local_board);
 	if (mydis.form[0] == 0) {
 		return 1;

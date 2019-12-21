@@ -1,4 +1,3 @@
-/*
 #include "five_type.h"
 #include "five_global.h"
 
@@ -6,18 +5,70 @@ typedef struct {
 	uint8_t form[5];
 }disvec;
 
-inline Point move(Point p, uint8_t i, uint8_t j) {
-	Point tmpp = { p.x + dx[i] * direction[j], p.y + dy[i] * direction[j] };
+extern disvec getvec(Point p, uint8_t color, Board* local_board);
+
+void qsort(uint8_t L, uint8_t R, disvec* r)
+{
+	uint8_t index = (L + R) / 2;
+	uint8_t flag = (*r).form[index];
+	uint8_t i, j;
+	i = L; j = R;
+	do {
+		while ((*r).form[i] < flag)i++;
+		while ((*r).form[j] > flag)j--;
+		if (i <= j) {
+			uint8_t temp = (*r).form[i]; (*r).form[i] = (*r).form[j]; (*r).form[j] = temp;
+			i++; j--;
+		}
+	} while (i <= j);
+	if (L < j)qsort(L, j, r);
+	if (i < R)qsort(i, R, r);
+}
+
+uint8_t greater(Point A, Point B, uint8_t color, Board* board) {
+	disvec vecA = getvec(A, color, board);
+	disvec vecB = getvec(B, color, board);
+	uint8_t i = 0;
+	qsort(0, 4, &vecA);
+	qsort(0, 4, &vecB);
+	while (vecA.form[i] == vecB.form[i]) {
+		i++;
+		if (i == 5) return 0;
+	}
+	return vecA.form[i] > vecB.form[i];
+}
+
+void qsortp(uint8_t L, uint8_t R, POOL *r,uint8_t color, Board *board)
+{
+	uint8_t index = (L+R)/2;
+	Point flag = (*r).record[index];
+	uint8_t i, j;
+	i = L; j = R;
+	do {
+		while (greater(flag,(*r).record[i],color,board))i++;
+		while (greater((*r).record[i], flag, color, board))j--;
+		if (i <= j) {
+			Point temp = (*r).record[i]; (*r).record[i] = (*r).record[j]; (*r).record[j] = temp;
+			i++; j--;
+		}
+	} while (i <= j);
+	if (L < j)qsortp(L, j, r, color, board);
+	if (i < R)qsortp(i, R, r, color, board);
+}
+
+/* 
+inline Pouint8_t move(Pouint8_t p, uint8_t i, uint8_t j) {
+	Pouint8_t tmpp = { p.x + dx[i] * direction[j], p.y + dy[i] * direction[j] };
 	return tmpp;
 }
 
-extern disvec getvec(Point P, uint8_t color);
+extern disvec getvec(Pouint8_t P, uint8_t color);
 
 POOL pool;
 
 uint8_t get_pool() {
 	uint8_t i = 0;
-	Point tmpp;
+	Pouint8_t tmpp;
 	Board inpool = { 0 };
 	while (i < Round) {
 		tmpp = PieceOnBoard.record[i];
@@ -43,7 +94,7 @@ typedef struct {
 
 typedef vecpare vecpool[255];
 
-typedef Point POOL[225];
+typedef Pouint8_t POOL[225];
 
 void insertion_sort(uint8_t arr[], uint8_t len) {
 	uint8_t i, j, temp;
@@ -73,8 +124,8 @@ uint8_t smaller(disvec A, disvec B) {
 	return A.form[0] < B.form[0];
 }
 
-uint8_t get_surroundings(Point p, uint8_t color) {
-	Point tmpp;
+uint8_t get_surroundings(Pouint8_t p, uint8_t color) {
+	Pouint8_t tmpp;
 	uint8_t count = 0;
 	for (uint8_t i = 0; i < 4; i++) {
 		for (uint8_t j = 0; j < 2; j++) {
@@ -114,7 +165,7 @@ uint8_t cross_compare(disvec mydis, disvec opdis) {
 void sortvecpool(vecpool disvecpool, POOL pool, uint8_t psp, uint8_t color) {
 	uint8_t i, j;
 	vecpare tempvec;
-	Point tmpp;
+	Pouint8_t tmpp;
 	for (i = 0; i < psp; i++) {
 		tempvec = disvecpool[i];
 		tmpp = pool[i];
@@ -132,7 +183,7 @@ void updatevec(POOL pool, uint8_t index, vecpool disvecpool) {
 	disvecpool[index].color[1] = getvec(id2dis(lookup(pool[index], 1)));
 }
 
-void add2pool(Point last, POOL pool, uint8_t* psp, vecpool disvecpool) {
+void add2pool(Pouint8_t last, POOL pool, uint8_t* psp, vecpool disvecpool) {
 
 	for (uint8_t i = 0; i < (*psp) + 1; i++) {
 		//updatevec(pool, i, disvecpool);
@@ -144,7 +195,7 @@ void add2pool(Point last, POOL pool, uint8_t* psp, vecpool disvecpool) {
 	}
 	for (uint8_t i = 0; i < 4; i++) {
 		for (uint8_t j = 0; j < 2; j++) {
-			Point tmpp = last;
+			Pouint8_t tmpp = last;
 			for (uint8_t k = 0; k < 4; k++) {
 				tmpp = move(tmpp, i, j);
 				if (verify_location(tmpp) && board[tmpp.x][tmpp.y] > 3) {
@@ -164,14 +215,14 @@ void add2pool(Point last, POOL pool, uint8_t* psp, vecpool disvecpool) {
 	}
 }
 
-Point calcboard(uint8_t color, POOL pool, uint8_t* psp, vecpool disvecpool) {
-	Point minmyP = { 7,7 };
+Pouint8_t calcboard(uint8_t color, POOL pool, uint8_t* psp, vecpool disvecpool) {
+	Pouint8_t minmyP = { 7,7 };
 	disvec minmydis;
-	Point minopP = { 7,7 };
+	Pouint8_t minopP = { 7,7 };
 	disvec minopdis;
 	disvec minoppare;
 	disvec minmypare;
-	Point resP;
+	Pouint8_t resP;
 	for (uint8_t i = 0; i < 5; i++) {
 		minmydis.form[i] = 10;
 		minopdis.form[i] = 10;
@@ -186,7 +237,7 @@ Point calcboard(uint8_t color, POOL pool, uint8_t* psp, vecpool disvecpool) {
 	sortvecpool(disvecpool, pool, *psp, !color);
 	sortvecpool(disvecpool + 10, pool + 10, (*psp) - 10, color);
 	for (uint8_t i = 0; i < (*psp); i++) {
-		Point P = pool[i];
+		Pouint8_t P = pool[i];
 		mydis = disvecpool[i].color[color];
 		opdis = disvecpool[i].color[!color];
 		if (equal(mydis, minmydis)) {
