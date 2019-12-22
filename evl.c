@@ -120,6 +120,24 @@ POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	return pool;
 }
 
+uint8_t iskill(Point p, uint8_t color, Board* local_board) {
+	disvec vec = getvec(p, color, local_board);
+	if (vec.form[0] == 1 || vec.form[1] == 1) return 1;
+	return 0;
+}
+
+POOL get_seq_kill(POOL* eva_pool, uint8_t color, uint8_t localRound, Board* local_board) {
+	uint8_t cnt = 0;
+	POOL seq = { {0,0} };
+	for (uint8_t i = 0; i < poolcnt; i++) {
+		if (iskill((*eva_pool).record[i], color, local_board)) {
+			seq.record[cnt++] = (*eva_pool).record[i];
+		}
+	}
+	poolcnt = cnt;
+	return seq;
+}
+
 InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
 	InfoPOOL infop = { 0 };
 	for (uint8_t i = 0; i < poolcnt; i++) {

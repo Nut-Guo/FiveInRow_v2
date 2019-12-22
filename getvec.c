@@ -26,12 +26,6 @@ typedef struct {
 	uint8_t form[6];
 }disvec;
 
-typedef struct {
-	disvec color[2];
-}vecpare;
-
-typedef vecpare vecpool[255];
-
 const uint8_t dis2four[1024] = 
 {		
 	   10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,

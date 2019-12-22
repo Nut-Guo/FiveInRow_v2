@@ -42,7 +42,7 @@ void init_board()
 	stop = 0;
 	board = empty;
 	print_board();
-//	init_zobrist();
+	init_zobrist();
 }
 
 /*Varify the location*/
