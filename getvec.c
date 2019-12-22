@@ -19,7 +19,7 @@ typedef struct {
 	4 directions.
 */
 typedef struct {
-	uint8_t distance[4][2];
+	uint8_t distance[2][4];
 }distance;
 
 typedef struct {
@@ -218,14 +218,38 @@ distance id2dis(Point p, uint8_t color, Board *local_board) {
 	pieceid id = lookup(p, color,local_board);
 	distance dis;
 	for (uint8_t i = 0; i < 4; i++) {
-		dis.distance[i][0] = dis2four[id.id[i]];
-		dis.distance[i][1] = dis2five[id.id[i]];
+		dis.distance[0][i] = dis2four[id.id[i]];
+		dis.distance[1][i] = dis2five[id.id[i]];
 	}
 	return dis;
 }
 
 inline uint8_t min(uint8_t x, uint8_t y) {
 	return x < y ? x : y;
+}
+
+uint8_t mini[2];//store the min direction of 4 and 5;
+void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
+{
+	uint8_t i, j, temp;
+	for (i = 0; i < 2; i++)
+	{
+		uint8_t min = i;
+		for (j = i + 1; j < len; j++)
+		{
+			if (a[j] < a[min])
+			{
+				min = j;
+			}
+		}
+		if (min != i)
+		{
+			temp = a[min];
+			a[min] = a[i];
+			a[i] = temp;
+		}
+		if (i == 0) mini[id] = min;
+	}
 }
 
 disvec getvec(Point p, uint8_t color, Board *local_board) {
@@ -239,28 +263,25 @@ disvec getvec(Point p, uint8_t color, Board *local_board) {
 	uint8_t i50 = 4;
 	uint8_t longline = 20;
 	for (uint8_t i = 0; i < 4; i++) {
-		if (dis.distance[i][0] == 20) {
+		if (dis.distance[0][i] == 20) {
 			longline = 0;
 			break;
 		}
-		if (mindis40 >= dis.distance[i][0]) {
-			mindis41 = mindis40;
-			mindis40 = dis.distance[i][0];
-			i40 = i;
-		}
-		if (mindis50 >= dis.distance[i][1]) {
-			mindis51 = mindis50;
-			mindis50 = dis.distance[i][1];
-			i50 = i;
-		}
 	}
+	selection_sort(dis.distance[0], 4, 0);
+	selection_sort(dis.distance[1], 4, 1);
+	mindis40 = dis.distance[0][0];
+	mindis41 = dis.distance[0][1];
+	mindis50 = dis.distance[1][0];
+	mindis51 = dis.distance[1][1];
+	i40 = mini[0];
+	i50 = mini[1];
 	//calc double 3
-	uint8_t mindisd3 = mindis40 + mindis41 - 2;
+	uint8_t mindisd3 = (mindis40 ? mindis40 - 1 : 0) + (mindis41 ? mindis41 - 1 : 0);
 	//calc 4 and 3
-	uint8_t mindis34 = i40 == i50 ? min(mindis40 + mindis51, mindis41 + mindis50) : mindis40 + mindis50;
-	mindis34 = mindis34 - 2;
+	uint8_t mindis34 = i40 == i50 ? min((mindis40 ? mindis40 - 1 : 0) + (mindis51 ? mindis51 - 1 : 0), (mindis41 ? mindis41 - 1 : 0) + (mindis50 ? mindis50 - 1 : 0)) : ((mindis40 ? mindis40 - 1 : 0) + (mindis50 ? mindis50 - 1 : 0));
 	//calc double 4
-	uint8_t mindisd4 = mindis50 + mindis51 - 2;
+	uint8_t mindisd4 = (mindis50 ? mindis50 - 1 : 0) + (mindis51 ? mindis51 - 1 : 0);
 	disvec vec = { { mindis50,mindis40,mindis34,mindisd4,mindisd3,longline} };
 	return vec;
 }

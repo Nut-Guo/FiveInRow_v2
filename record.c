@@ -12,6 +12,8 @@ extern void game(char mode);
 extern char drop(Point p);
 extern Point(*Input[])(Point last);
 extern void init_board();
+extern void print_board();
+void record_menu();
 
 void record() {
 	printf("Please specify the filename:");
@@ -55,6 +57,29 @@ void print_record() {
 		exit(0);
 }
 
+void revert() {
+	Point p = PieceOnBoard.record[--Round];
+	board.location[p.x][p.y] = empty.location[p.y][p.y];
+	print_board();
+	record_menu();
+}
+
+void record_menu() {
+	printf("Continue(c)\tRevert(r)\tQuit(q)\tMenu(else)\n");
+	switch (_getch()) {
+	case 'r':
+		revert();
+		break;
+	case 'c':
+		game(1);
+		break;
+	case 'q':
+		exit(0);
+	default:
+		break;
+	}
+}
+
 void load_record(char* name) {
 	char filepath[120] = { 0 };
 	sprintf_s(filepath, 120, "%s%s%s", cwd, "\\History\\", name);
@@ -66,14 +91,14 @@ void load_record(char* name) {
 	{
 		int Round = 0;
 		char tmpn;
+		init_board();
 		if (archive) {
 			fseek(archive, 0L, SEEK_SET);
 			fscanf_s(archive, "%d%c", &Round, &tmpn, 1);
 		}
 		int counter = 0;
-		init_board();
 		if (archive) {
-			while (counter++ < Round && !stop) {
+			while (counter++ < Round) {
 				char x, y, tmpx;
 				int tmpy;
 				fscanf_s(archive, "%c%d%c", &tmpx, 1, &tmpy, &tmpn, 1);
@@ -81,21 +106,11 @@ void load_record(char* name) {
 				y = tmpx - 'a';
 				Point p = { x,y };
 				stop = drop(p);
-				if (!stop)
-					player ^= 1;
+				player = counter % 2;
 			}
 			fclose(archive);
 		}
-		printf("Continue(c)\tQuit(q) or anything else to go back to menu.\n");
-		switch (_getch()) {
-		case 'c':
-			game(1);
-			break;
-		case 'q':
-			exit(0);
-		default:
-			break;
-		}
+		record_menu();
 	}
 }
 

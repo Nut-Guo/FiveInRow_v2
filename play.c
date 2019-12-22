@@ -74,6 +74,8 @@ void new_game(Point(*P1)(Point last), Point(*P2)(Point last))
 
 void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
 {
+	stop = 0;
+	player = Round % 2;
 	play(*P1, *P2);
 }
 

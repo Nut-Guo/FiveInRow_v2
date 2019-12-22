@@ -1,15 +1,62 @@
 #include "five_type.h"
 #include "five_global.h"
 
+extern inline int32_t get_value(Point p, uint8_t color, Board* local_board);
+typedef struct {
+	Point* point;
+	int32_t value;
+}Point_info;
+
+typedef struct {
+	Point_info info[255];
+}InfoPOOL;
+
+void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len,uint8_t cnt, Board* local_board){
+	uint8_t i, j;
+	Point_info temp;
+	for (i = 0; i < len; i++)
+	{
+		uint8_t max = i;
+		for (j = i + 1; j < cnt; j++)
+		{
+			if ((*r).info[j].value > (*r).info[max].value)
+			{
+				max = j;
+			}
+		}
+		if (max != i)
+		{
+			temp = (*r).info[max];
+			(*r).info[max] = (*r).info[i];
+			(*r).info[i] = temp;
+		}
+	}
+}
+
+void qsort_pool(uint8_t L, uint8_t R, InfoPOOL* r, uint8_t color, Board* local_board) {
+	uint8_t index = (L + R) / 2;
+	int32_t flag = (*r).info[index].value;
+	int8_t i, j;
+	i = L; j = R;
+	do {
+		while ((*r).info[i].value > flag && i <= R)i++;
+		while ((*r).info[j].value < flag && j >= L)j--;
+		if (i <= j) {
+			Point_info temp = (*r).info[i]; (*r).info[i] = (*r).info[j]; (*r).info[j] = temp;
+			i++; j--;
+		}
+	} while (i <= j);
+	if (L < j)qsort_pool(L, j, r,color, local_board);
+	if (i < R)qsort_pool(i, R, r, color, local_board);
+}
+
+/*
 typedef struct {
 	uint8_t form[6];
 }disvec;
-
 extern inline uint8_t check_ban(disvec* vec, uint8_t color);
 extern disvec getvec(Point p, uint8_t color, Board* local_board);
 extern uint8_t poolcnt;
-extern inline int32_t get_value(Point p, uint8_t color, Board* local_board);
-
 void qsort(uint8_t L, uint8_t R, disvec* r)
 {
 	uint8_t index = (L + R) / 2;
@@ -27,10 +74,7 @@ void qsort(uint8_t L, uint8_t R, disvec* r)
 	if (L < j)qsort(L, j, r);
 	if (i < R)qsort(i, R, r);
 }
-inline uint8_t isgreater(Point A, Point B, uint8_t color, Board* local_board) {
-	return get_value(A, color, local_board) > get_value(B, color, local_board);
-}
-
+*/
 /*
 uint8_t greater(disvec vecA, disvec vecB, uint8_t color) {
 	uint8_t i = 0;
@@ -49,24 +93,6 @@ uint8_t greater(disvec vecA, disvec vecB, uint8_t color) {
 	return vecA.form[i] < vecB.form[i];
 }
 */
-
-POOL qsort_pool(uint8_t L, uint8_t R, POOL* r, uint8_t color, Board* local_board) {
-	uint8_t index = (L + R) / 2;
-	Point flag = (*r).record[index];
-	int8_t i, j;
-	i = L; j = R;
-	do {
-		while (get_value((*r).record[i], color, local_board) < get_value(flag, color, local_board) && i <= R)i++;
-		while (get_value((*r).record[j], color, local_board) > get_value(flag, color, local_board) && j >= L)j--;
-		if (i <= j) {
-			Point temp = (*r).record[i]; (*r).record[i] = (*r).record[j]; (*r).record[j] = temp;
-			i++; j--;
-		}
-	} while (i <= j);
-	if (L < j)qsort_pool(L, j, r,color, local_board);
-	if (i < R)qsort_pool(i, R, r, color, local_board);
-}
-
 /*
 void qsortp(uint8_t L, uint8_t R, POOL *r,uint8_t color, Board *board)
 {
