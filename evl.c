@@ -11,20 +11,19 @@ typedef struct {
 }disvec;
 
 extern disvec getvec(Point p, uint8_t color, Board *local_board);
-inline Point move(Point p, uint8_t i, uint8_t j);
+extern inline Point move(Point p, uint8_t i, uint8_t j);
 extern uint8_t verify_location(Point p);
 
 uint8_t poolcnt = 0;
 
-
-uint8_t check_ban(disvec vec, uint8_t color) {
+inline uint8_t check_ban(disvec* vec, uint8_t color) {
 	if (!color) {
 		for (uint8_t i = 3; i < 6; i++) {
-			if (!vec.form[i]) return 1;
+			if (!(*vec).form[i]) return 1;
 		}
 	}
 	else {
-		if (!vec.form[5]) return 1;
+		if (!(*vec).form[5]) return 1;
 	}
 	return 0;
 }
@@ -34,31 +33,33 @@ uint8_t check(Point p, uint8_t color, Board* local_board) {
 	for (uint8_t i = 0; i < Round; i++) {
 		if (board.location[PieceOnBoard.record[i].x][PieceOnBoard.record[i].y] == color) {
 			disvec tmpvec = getvec(PieceOnBoard.record[i], color, local_board);
-			if (check_ban(tmpvec, color)) {
-				printf("Ban triggered!");
+			if (check_ban(&tmpvec, color)) {
+				printf("Ban triggered!\n");
 				player = !player;
 				return 1;
 			}
-			if (tmpvec.form[0] == 1) return 1;
+			if (tmpvec.form[0] == 0) return 1;
 		}
 	};
 	return 0;
 }
 
-uint8_t check_win(Point p, uint8_t color, Board* local_board) {
+uint8_t check_win(disvec* vec, uint8_t color) {
+	/*
 	disvec vec = getvec(p, color, local_board);
 	if (check_ban(vec, color)) {
 		return 10;
 	};
+	*/
 	for (uint8_t i = 0; i < 3; i++) {
-		if (vec.form[i] == 0) {
+		if ((*vec).form[i] == 0) {
 			return i + 1;
 		}
 	}
 	if (color)
 	{
-		if (vec.form[3] == 0) return 4;
-		if (vec.form[4] == 0) return 5;
+		if ((*vec).form[3] == 0) return 4;
+		if ((*vec).form[4] == 0) return 5;
 	}
 	return 0;
 }
@@ -82,10 +83,17 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 
 inline int32_t get_value(Point p, uint8_t color, Board *local_board) {
 	disvec vec = getvec(p, color, local_board);
-	if (check_ban(vec, color))return 0;
+	int32_t win_value = 0;
+	if (check_ban(&vec, color))return 0;
+	if (win_value = check_win(&vec, color)) return INT32_MAX - win_value;
 	int32_t value = 0;
 	value += vec.form[0] < 5 ? 1 << ((5 - vec.form[0]) * 3) : 0;
-	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[0]) * 3) : 0;
+	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[1]) * 3) : 0;
+	value += vec.form[2] < 4 ? 1 << ((4 - vec.form[2]) * 4) : 0;
+	if (color) {
+		value += vec.form[3] < 4 ? 1 << ((4 - vec.form[3]) * 4) : 0;
+		value += vec.form[3] < 4 ? 1 << ((4 - vec.form[3]) * 4) : 0;
+	}
 	return value;
 }
 

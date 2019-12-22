@@ -5,13 +5,19 @@
 
 #define MAXDEPTH 1
 Board local_board;
+typedef struct {
+	uint8_t form[6];
+}disvec;
+
 extern uint8_t poolcnt;
 extern POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board);
 extern int32_t evaluate(uint8_t color, POOL *pool, Board *local_board);
 extern uint8_t check_win(Point p, uint8_t color, Board *local_board);
 extern uint8_t check(Point p, uint8_t color, Board *local_board);
-extern void qsortp(uint8_t L, uint8_t R, POOL* r, uint8_t color, Board* board);
-
+extern POOL sort_pool(POOL eva_pool, uint8_t color, Board* local_board);
+extern disvec getvec(Point p, uint8_t color, Board* local_board);
+extern uint8_t greater(disvec vecA, disvec vecB, uint8_t color);
+extern POOL qsort_pool(uint8_t L, uint8_t R, POOL* r, uint8_t color, Board* local_board);
 //uint16_t calc_hash(Point p, uint16_t origin_hash, uint8_t color);
 
 //int32_t hash[UINT16_MAX];
@@ -21,16 +27,29 @@ uint8_t local_Round;
 Board local_board;
 uint16_t state_hash = 0;
 
-Point Precalc() {
-	POOL eva_pool = get_pool(&local_PieceOnBoard, local_Round, &local_board);
-
+/*
+uint8_t Precalc(uint8_t color) {
+	POOL mysorted_pool = sort_pool(get_pool(&local_PieceOnBoard, local_Round, &local_board),color,&local_board);
+	uint8_t mycheck_value = check_win(mysorted_pool.record[0], color, &local_board);
+	POOL opsorted_pool = sort_pool(get_pool(&local_PieceOnBoard, local_Round, &local_board), !color, &local_board);
+	uint8_t opcheck_value = check_win(opsorted_pool.record[0], !color, &local_board);
+	if (mycheck_value && mycheck_value != 10 && (mycheck_value <= opcheck_value || !opcheck_value)) {
+		Preturn = mysorted_pool.record[0];
+		return 2;
+	}
+	else if (opcheck_value) {
+		Preturn = opsorted_pool.record[0];
+		return 1;
+	}
+	Preturn = opsorted_pool.record[0];
+	return 0;
 }
+*/
 
 int32_t search(uint8_t ab, int32_t AB, uint8_t depth/* uint16_t src_hash, int32_t *hash*/) {
 	int32_t max = INT32_MIN;
 	int32_t min = INT32_MAX;
-	POOL eva_pool = get_pool(&local_PieceOnBoard, local_Round, &local_board);
-	//qsortp(0, poolcnt - 1, &eva_pool, player, &local_board);
+	POOL eva_pool = /*sort_pool(get_pool(&local_PieceOnBoard, local_Round, &local_board), (!ab) ^ player, &local_board);*/get_pool(&local_PieceOnBoard, local_Round, &local_board);
 	uint8_t cnt = poolcnt;
 	for (uint8_t i = 0; i < cnt; i++) {
 		Point tmpp = eva_pool.record[i];
@@ -103,9 +122,14 @@ Point search_point(Point last) {
 	local_board = board;
 	local_PieceOnBoard = PieceOnBoard;
 	local_Round = Round;
+	if (Round == 0) {
+		Point center = { 7,7 };
+		return center;
+	}
 	//memset(hash, 0, sizeof(int32_t) * UINT16_MAX);
 	//state_hash = calc_hash(last, state_hash, !player);
-	search(1,INT32_MIN, MAXDEPTH/*, state_hash, hash*/);
-	//state_hash = calc_hash(Preturn, state_hash, player);
+	if (!Precalc(player))
+		search(1, INT32_MIN, MAXDEPTH);
 	return Preturn;
+	//state_hash = calc_hash(Preturn, state_hash, player);
 }
