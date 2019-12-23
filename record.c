@@ -12,8 +12,8 @@ extern void game(char mode);
 extern char drop(Point p);
 extern Point(*Input[])(Point last);
 extern void init_board();
-extern void print_board();
-void record_menu();
+extern void print_board(Board *board);
+void record_menu(FILE* archive, int* counter);
 
 void record() {
 	printf("Please specify the filename:");
@@ -60,20 +60,44 @@ void print_record() {
 void revert() {
 	Point p = PieceOnBoard.record[--Round];
 	board.location[p.x][p.y] = empty.location[p.y][p.y];
-	print_board();
-	record_menu();
+	print_board(&board);
 }
 
-void record_menu() {
-	printf("Continue(c)\tRevert(r)\tQuit(q)\tMenu(else)\n");
+void load_piece(FILE* archive, int* counter) {
+	if ((*counter) == Round) {
+		print_board(&board);
+		printf("All loaded\n");
+		return;
+	}
+	Point p = PieceOnBoard.record[Round];
+	player = Round % 2;
+	stop = drop(p);
+}
+
+void record_menu(FILE* archive, int *counter) {
+	printf("Total Round: %d\n", *counter);
+	printf("Step(s)\tLoad_all(a)\tContinue(c)\tRevert(r)\tQuit(q)\tMenu(else)\n");
 	switch (_getch()) {
+	case('s'):
+		load_piece(archive, counter);
+		record_menu(archive, counter);
+		break;
+	case('a'):
+		while (Round < *counter) {
+			load_piece(archive,counter);
+		}
+		record_menu(archive, counter);
+		break;
 	case 'r':
 		revert();
+		record_menu(archive, counter);
 		break;
 	case 'c':
+		fclose(archive);
 		game(1);
 		break;
 	case 'q':
+		fclose(archive);
 		exit(0);
 	default:
 		break;
@@ -89,28 +113,27 @@ void load_record(char* name) {
 		printf_s("The file %s was not opened\n", name);
 	else
 	{
-		int Round = 0;
+		Round = 0;
+		int counter = 0;
 		char tmpn;
 		init_board();
 		if (archive) {
 			fseek(archive, 0L, SEEK_SET);
-			fscanf_s(archive, "%d%c", &Round, &tmpn, 1);
+			fscanf_s(archive, "%d%c", &counter, &tmpn, 1);
 		}
-		int counter = 0;
+		int i = 0;
+		while (i < counter) {
+			char x, y, tmpx, tmpn;
+			int tmpy;
+			fscanf_s(archive, "%c%d%c", &tmpx, 1, &tmpy, &tmpn, 1);
+			x = 15 - tmpy;
+			y = tmpx - 'a';
+			Point p = { x,y };
+			PieceOnBoard.record[i++] = p;
+		}
 		if (archive) {
-			while (counter++ < Round) {
-				char x, y, tmpx;
-				int tmpy;
-				fscanf_s(archive, "%c%d%c", &tmpx, 1, &tmpy, &tmpn, 1);
-				x = 15 - tmpy;
-				y = tmpx - 'a';
-				Point p = { x,y };
-				stop = drop(p);
-				player = counter % 2;
-			}
-			fclose(archive);
+			record_menu(archive, &counter);
 		}
-		record_menu();
 	}
 }
 

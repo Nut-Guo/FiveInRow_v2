@@ -19,7 +19,7 @@ extern void print_record();
 extern void init_zobrist();
 
 /*Print the board and the present state.*/
-void print_board()
+void print_board(Board *board)
 {
 	system("cls");
 	for (int i = 0; i <= 14; i++)
@@ -27,7 +27,7 @@ void print_board()
 		printf("%2d", 15 - i);
 		for (int j = 0; j <= 14; j++)
 		{
-			printf("%s", symbol[board.location[i][j]]);
+			printf("%s", symbol[(*board).location[i][j]]);
 		}
 		putchar('\n');
 	}
@@ -41,7 +41,7 @@ void init_board()
 	Round = 0;
 	stop = 0;
 	board = empty;
-	print_board();
+	print_board(&board);
 	init_zobrist();
 }
 
@@ -57,7 +57,7 @@ uint8_t verify_location(Point p)
 uint8_t drop(Point P)
 {
 	board.location[P.x][P.y] = player + 2;
-	print_board();
+	print_board(&board);
 	printf("Last piece:%c %d\n", P.y + 'a', 15 - P.x);
 	board.location[P.x][P.y] = player;
 	PieceOnBoard.record[Round++] = P;

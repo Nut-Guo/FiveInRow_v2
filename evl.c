@@ -96,12 +96,12 @@ inline int32_t get_value(Point p, uint8_t color, Board *local_board) {
 	int32_t value = 0;
 	if (check_ban(&vec, color))return 0;
 	if (win_value = check_win(&vec, color)) value += (INT32_MAX >> 1) + (INT32_MAX >> (win_value + 1));
-	//value += vec.form[0] < 5 ? 1 << ((5 - vec.form[0]) * 3) : 0;
-	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[1])) : 0;
+	value += vec.form[0] < 5 ? 1 << ((5 - vec.form[0])) : 0;
+	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[1]) * 2) : 0;
 	value += vec.form[2] < 6 ? 1 << ((6 - vec.form[2]) * 2) : 0;
 	if (color) {
-		value += vec.form[3] < 7 ? 1 << ((7 - vec.form[3])) : 0;
-		value += vec.form[3] < 5 ? 1 << ((5 - vec.form[3])) : 0;
+		value += vec.form[3] < 7 ? 1 << ((7 - vec.form[3])*2) : 0;
+		value += vec.form[3] < 5 ? 1 << ((5 - vec.form[3])*2) : 0;
 	}
 	return value;
 }
@@ -122,7 +122,8 @@ POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 
 uint8_t iskill(Point p, uint8_t color, Board* local_board) {
 	disvec vec = getvec(p, color, local_board);
-	if (vec.form[0] == 1 || vec.form[1] == 1) return 1;
+	if (vec.form[0] <= 1) return 2;
+	if (vec.form[1] <= 1) return 1;
 	return 0;
 }
 
@@ -156,14 +157,14 @@ int32_t evaluate(uint8_t color, POOL *pool, Board *local_board) {
 	for (uint8_t i = 0; i < poolcnt; i++) {
 		int32_t myvalue = get_value((*pool).record[i], color, local_board);
 		int32_t opvalue = get_value((*pool).record[i], !color, local_board);
-		value += myvalue;
+		value += (myvalue << 1);// more agressive
 		value -= opvalue;
 		mymax = myvalue > mymax ? myvalue : mymax;
 		opmax = opvalue > opmax ? opvalue : opmax;
 	}
 	if (mymax > INT32_MAX >> 1) {
 		if (opmax > INT32_MAX >> 1) {
-			return mymax > opmax ? mymax : -opmax;
+			return mymax >= opmax ? mymax : -opmax;
 		}
 		else mymax;
 	}

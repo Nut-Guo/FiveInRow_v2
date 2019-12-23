@@ -276,6 +276,18 @@ disvec getvec(Point p, uint8_t color, Board *local_board) {
 	uint8_t mindis34 = i40 == i50 ? min((mindis40 ? mindis40 - 1 : 0) + (mindis51 ? mindis51 - 1 : 0), (mindis41 ? mindis41 - 1 : 0) + (mindis50 ? mindis50 - 1 : 0)) : ((mindis40 ? mindis40 - 1 : 0) + (mindis50 ? mindis50 - 1 : 0));
 	//calc double 4
 	uint8_t mindisd4 = (mindis50 ? mindis50 - 1 : 0) + (mindis51 ? mindis51 - 1 : 0);
+	if (!mindis50) {
+		mindisd4 = 10;
+		mindis34 = 10;
+		mindisd3 = 10;
+	}
+	if (!mindisd4) {
+		mindisd3 = 10;
+		mindis34 = 10;
+	}
+	if (!mindis34) {
+		mindisd3 = 10;
+	}
 	disvec vec = { { mindis50,mindis40,mindis34,mindisd4,mindisd3,longline} };
 	return vec;
 }
