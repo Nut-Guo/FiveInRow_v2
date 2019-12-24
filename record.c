@@ -139,7 +139,7 @@ void load_record(char* name) {
 
 void get_the_record() {
 	char num = 0;
-	char name[20][20] = { 0 };
+	char name[100][20] = { 0 };
 	char dir[120];
 	sprintf_s(dir, 120, "%s%s", cwd, "\\History\\*");
 	long long lfDir;

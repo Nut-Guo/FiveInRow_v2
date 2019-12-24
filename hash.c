@@ -10,8 +10,8 @@ typedef struct {
 Hashtable Zobrist;
 
 void init_zobrist() {
-    for (int32_t i = 0; i < 15; i++) {
-        for (int32_t j = 0; j < 15; j++) {
+    for (int16_t i = 0; i < 15; i++) {
+        for (int16_t j = 0; j < 15; j++) {
             Zobrist[0][i][j] = rand() & 0xfff;
             Zobrist[1][i][j] = rand() & 0xfff;
         }

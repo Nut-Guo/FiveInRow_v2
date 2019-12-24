@@ -1,10 +1,10 @@
 #include "five_type.h"
 #include "five_global.h"
 
-extern inline int32_t get_value(Point p, uint8_t color, Board* local_board);
+extern inline int16_t get_value(Point p, uint8_t color, Board* local_board);
 typedef struct {
 	Point* point;
-	int32_t value;
+	int16_t value;
 }Point_info;
 
 typedef struct {
@@ -35,7 +35,7 @@ void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len,uint8_t cnt, Board* loca
 
 void qsort_pool(uint8_t L, uint8_t R, InfoPOOL* r, uint8_t color, Board* local_board) {
 	uint8_t index = (L + R) / 2;
-	int32_t flag = (*r).info[index].value;
+	int16_t flag = (*r).info[index].value;
 	int8_t i, j;
 	i = L; j = R;
 	do {

@@ -10,14 +10,20 @@ typedef struct {
 	uint8_t form[6];
 }disvec;
 
+typedef struct {
+	int16_t value[15][15];
+}Value_Table;
+
+extern Value_Table local_value[2];
+
 extern disvec getvec(Point p, uint8_t color, Board *local_board);
 extern inline Point move(Point p, uint8_t i, uint8_t j);
 extern uint8_t verify_location(Point p);
 uint8_t poolcnt = 0;
-
+extern uint8_t SCOPE;
 typedef struct {
 	Point* point;
-	int32_t value;
+	int16_t value;
 }Point_info;
 
 typedef struct {
@@ -80,7 +86,7 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 		for (uint8_t i = 0; i < 4; i++) {
 			for (uint8_t j = 0; j < 2; j++) {
 				Point tmpp = p;
-				for (uint8_t k = 0; k < 2; k++) {
+				for (uint8_t k = 0; k < SCOPE; k++) {
 					tmpp = move(tmpp, i, j);
 					if (verify_location(tmpp) && (*local_board).location[tmpp.x][tmpp.y] > 2)surroundings.location[tmpp.x][tmpp.y] = 1;
 				}
@@ -88,22 +94,6 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 		}
 	}
 	return surroundings;
-}
-
-inline int32_t get_value(Point p, uint8_t color, Board *local_board) {
-	disvec vec = getvec(p, color, local_board);
-	int32_t win_value = 0;
-	int32_t value = 0;
-	if (check_ban(&vec, color))return 0;
-	if (win_value = check_win(&vec, color)) value += (INT32_MAX >> 1) + (INT32_MAX >> (win_value + 1));
-	value += vec.form[0] < 5 ? 1 << ((5 - vec.form[0])) : 0;
-	value += vec.form[1] < 4 ? 1 << ((4 - vec.form[1]) * 2) : 0;
-	value += vec.form[2] < 6 ? 1 << ((6 - vec.form[2]) * 2) : 0;
-	if (color) {
-		value += vec.form[3] < 7 ? 1 << ((7 - vec.form[3])*2) : 0;
-		value += vec.form[3] < 5 ? 1 << ((5 - vec.form[3])*2) : 0;
-	}
-	return value;
 }
 
 POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
@@ -143,49 +133,34 @@ InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
 	InfoPOOL infop = { 0 };
 	for (uint8_t i = 0; i < poolcnt; i++) {
 		Point tmpp = (*pool).record[i];
-		int32_t value = get_value(tmpp, color, local_board);
+		//int16_t value = get_value(tmpp, color, local_board);
 		infop.info[i].point = &(*pool).record[i];
-		infop.info[i].value = value;
+		infop.info[i].value = local_value[color].value[tmpp.x][tmpp.y];
 	}
 	return infop;
 }
 
-int32_t evaluate(uint8_t color, POOL *pool, Board *local_board) {
-	int32_t value = 0;
-	int32_t mymax = 0;
-	int32_t opmax = 0;
+int16_t evaluate(uint8_t color, POOL *pool, Board *local_board) {
+	int16_t value = 0;
+	int16_t mymax = 0;
+	int16_t opmax = 0;
 	for (uint8_t i = 0; i < poolcnt; i++) {
-		int32_t myvalue = get_value((*pool).record[i], color, local_board);
-		int32_t opvalue = get_value((*pool).record[i], !color, local_board);
-		value += (myvalue << 1);// more agressive
+		int16_t myvalue = local_value[color].value[(*pool).record[i].x][(*pool).record[i].y];//get_value((*pool).record[i], color, local_board);
+		int16_t opvalue = local_value[!color].value[(*pool).record[i].x][(*pool).record[i].y];//get_value((*pool).record[i], !color, local_board);
+		value += myvalue;
 		value -= opvalue;
 		mymax = myvalue > mymax ? myvalue : mymax;
 		opmax = opvalue > opmax ? opvalue : opmax;
 	}
-	if (mymax > INT32_MAX >> 1) {
-		if (opmax > INT32_MAX >> 1) {
+	
+	if (mymax > INT16_MAX >> 1) {
+		if (opmax > INT16_MAX >> 1) {
 			return mymax >= opmax ? mymax : -opmax;
 		}
-		else mymax;
+		else return mymax;
 	}
-	else if (opmax > INT32_MAX >> 1) {
+	else if (opmax > INT16_MAX >> 1) {
 		return -opmax;
 	}
-		/*
-		mymax = myvalue > mymax ? myvalue : mymax;
-		opmax = opvalue > opmax ? opvalue : opmax;
-		value += myvalue > INT32_MAX - 5 ? 0 : myvalue;
-		value -= opvalue > INT32_MAX - 5 ? 0 : opvalue;
-	}
-	if (mymax > INT32_MAX - 5) {
-		if (opmax > INT32_MAX - 5) {
-			return mymax > opmax ? mymax : -opmax;
-		}
-		else mymax;
-	}
-	else if (opmax > INT32_MAX - 5) {
-		return -opmax;
-	}
-	*/
 	return value;
 }
