@@ -133,8 +133,8 @@ POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 
 uint8_t iskill(Point p, uint8_t color, Board* local_board) {
 	disvec vec = getvec(p, color, local_board);
-	if (vec.form[0] <= 1) return 2;
 	if (vec.form[1] <= 1) return 1;
+	if (vec.form[0] <= 1) return 2;
 	return 0;
 }
 
