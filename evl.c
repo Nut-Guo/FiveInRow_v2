@@ -4,8 +4,8 @@
 
 #include "five_type.h"
 #include "five_global.h"
+#include <stdio.h>
 
-Board empty_surroundings = { {0} };
 typedef struct {
 	uint8_t form[6];
 }disvec;
@@ -14,13 +14,6 @@ typedef struct {
 	int16_t value[15][15];
 }Value_Table;
 
-extern Value_Table local_value[2];
-
-extern disvec getvec(Point p, uint8_t color, Board *local_board);
-extern inline Point move(Point p, uint8_t i, uint8_t j);
-extern uint8_t verify_location(Point p);
-uint8_t poolcnt = 0;
-extern uint8_t SCOPE;
 typedef struct {
 	Point* point;
 	int16_t value;
@@ -29,6 +22,15 @@ typedef struct {
 typedef struct {
 	Point_info info[255];
 }InfoPOOL;
+
+extern Value_Table local_value[2];
+extern disvec getvec(Point p, uint8_t color, Board *local_board);
+extern inline Point move(Point p, uint8_t i, uint8_t j);
+extern inline uint8_t verify_location(Point p);
+extern uint8_t SCOPE;
+
+uint8_t poolcnt = 0;
+Board empty_surroundings = { {0} };
 
 inline uint8_t check_ban(disvec* vec, uint8_t color) {
 	if (!color) {
@@ -60,12 +62,10 @@ uint8_t check(Point p, uint8_t color, Board* local_board) {
 }
 
 uint8_t check_win(disvec* vec, uint8_t color) {
-	/*
-	disvec vec = getvec(p, color, local_board);
+	//disvec vec = getvec(p, color, local_board);
 	if (check_ban(vec, color)) {
-		return 10;
+		return 0;
 	};
-	*/
 	for (uint8_t i = 0; i < 3; i++) {
 		if ((*vec).form[i] == 0) {
 			return i + 1;
@@ -79,6 +79,25 @@ uint8_t check_win(disvec* vec, uint8_t color) {
 	return 0;
 }
 
+int16_t get_value(Point p, uint8_t color, Board* local_board) {
+	disvec vec = getvec(p, color, local_board);
+	int16_t win_value = 0;
+	int16_t value = 0;
+	if (check_ban(&vec, color))return 0;
+	if (win_value = check_win(&vec, color)) {
+		value += (INT16_MAX >> 1) + (INT16_MAX >> (win_value + 1));
+		return value;
+	}
+	value += vec.form[0] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[0])) : 0;
+	value += vec.form[1] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[1])) : 0;
+	value += vec.form[2] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[2])) : 0;
+	if (color) {
+		value += vec.form[3] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[3])) : 0;
+		value += vec.form[4] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[4])) : 0;
+	}
+	return value;
+}
+
 inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	Board surroundings = empty_surroundings;
 	for (uint8_t k = 0; k < localRound; k++) {
@@ -86,9 +105,11 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 		for (uint8_t i = 0; i < 4; i++) {
 			for (uint8_t j = 0; j < 2; j++) {
 				Point tmpp = p;
-				for (uint8_t k = 0; k < SCOPE; k++) {
+				for (uint8_t l = 0; l < SCOPE; l++) {
 					tmpp = move(tmpp, i, j);
-					if (verify_location(tmpp) && (*local_board).location[tmpp.x][tmpp.y] > 2)surroundings.location[tmpp.x][tmpp.y] = 1;
+					if (verify_location(tmpp) && 
+						(*local_board).location[tmpp.x][tmpp.y] > 2)
+						surroundings.location[tmpp.x][tmpp.y] = 1;
 				}
 			}
 		}
@@ -133,34 +154,30 @@ InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
 	InfoPOOL infop = { 0 };
 	for (uint8_t i = 0; i < poolcnt; i++) {
 		Point tmpp = (*pool).record[i];
-		//int16_t value = get_value(tmpp, color, local_board);
 		infop.info[i].point = &(*pool).record[i];
 		infop.info[i].value = local_value[color].value[tmpp.x][tmpp.y];
 	}
 	return infop;
 }
 
-int16_t evaluate(uint8_t color, POOL *pool, Board *local_board) {
-	int16_t value = 0;
-	int16_t mymax = 0;
-	int16_t opmax = 0;
-	for (uint8_t i = 0; i < poolcnt; i++) {
-		int16_t myvalue = local_value[color].value[(*pool).record[i].x][(*pool).record[i].y];//get_value((*pool).record[i], color, local_board);
-		int16_t opvalue = local_value[!color].value[(*pool).record[i].x][(*pool).record[i].y];//get_value((*pool).record[i], !color, local_board);
-		value += myvalue;
-		value -= opvalue;
-		mymax = myvalue > mymax ? myvalue : mymax;
-		opmax = opvalue > opmax ? opvalue : opmax;
-	}
-	
-	if (mymax > INT16_MAX >> 1) {
-		if (opmax > INT16_MAX >> 1) {
-			return mymax >= opmax ? mymax : -opmax;
+void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len, uint8_t cnt, Board* local_board) {
+	uint8_t i, j;
+	Point_info temp;
+	for (i = 0; i < len; i++)
+	{
+		uint8_t max = i;
+		for (j = i + 1; j < cnt; j++)
+		{
+			if ((*r).info[j].value > (*r).info[max].value)
+			{
+				max = j;
+			}
 		}
-		else return mymax;
+		if (max != i)
+		{
+			temp = (*r).info[max];
+			(*r).info[max] = (*r).info[i];
+			(*r).info[i] = temp;
+		}
 	}
-	else if (opmax > INT16_MAX >> 1) {
-		return -opmax;
-	}
-	return value;
 }

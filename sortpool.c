@@ -33,6 +33,7 @@ void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len,uint8_t cnt, Board* loca
 	}
 }
 
+/*
 void qsort_pool(uint8_t L, uint8_t R, InfoPOOL* r, uint8_t color, Board* local_board) {
 	uint8_t index = (L + R) / 2;
 	int16_t flag = (*r).info[index].value;
@@ -49,7 +50,7 @@ void qsort_pool(uint8_t L, uint8_t R, InfoPOOL* r, uint8_t color, Board* local_b
 	if (L < j)qsort_pool(L, j, r,color, local_board);
 	if (i < R)qsort_pool(i, R, r, color, local_board);
 }
-
+*/
 /*
 typedef struct {
 	uint8_t form[6];

@@ -33,9 +33,6 @@
     <ClCompile Include="getvec.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="sortpool.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="pc_search.c">
       <Filter>源文件</Filter>
     </ClCompile>

@@ -126,7 +126,6 @@
     <ClCompile Include="hash.c" />
     <ClCompile Include="pc_search.c" />
     <ClCompile Include="record.c" />
-    <ClCompile Include="sortpool.c" />
     <ClCompile Include="const.c" />
     <ClCompile Include="evl.c" />
     <ClCompile Include="getvec.c" />

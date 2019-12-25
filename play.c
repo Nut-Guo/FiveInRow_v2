@@ -17,6 +17,8 @@ POOL PieceOnBoard;
 extern uint8_t check(Point p, uint8_t color, Board *local_board);
 extern void print_record();
 extern void init_zobrist();
+extern void(*Play[])(Point(*P1)(), Point(*P2)());
+extern Point(*Input[])();
 
 /*Print the board and the present state.*/
 void print_board(Board *board)
@@ -46,7 +48,7 @@ void init_board()
 }
 
 /*Varify the location*/
-uint8_t verify_location(Point p)
+extern inline uint8_t verify_location(Point p)
 {
 	if (p.x >= 0 && p.x <= 14 && p.y >= 0 && p.y <= 14)
 		return 1;

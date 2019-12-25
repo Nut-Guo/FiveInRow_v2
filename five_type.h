@@ -18,15 +18,3 @@ typedef struct {
 typedef struct {
 	Point record[225];
 }POOL;
-
-/*
-typedef struct Piece {
-	char x;
-	char y;
-	char player;
-	char* len[4];
-	struct Chunk_Info* chunk_in[4];
-}Pieces[15][15];
-
-typedef struct Piece* Used_Pieces[15 * 15];
-*/

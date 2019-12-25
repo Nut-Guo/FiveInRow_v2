@@ -158,15 +158,15 @@ const uint8_t dis2five[1024] =
 	   20, 20
 };
 
-extern uint8_t verify_location(Point p);
+extern inline uint8_t verify_location(Point p);
 // move one step in the specific direction
-inline Point move(Point p, uint8_t i, uint8_t j) {
+extern inline Point move(Point p, uint8_t i, uint8_t j) {
 	Point tmpp = { p.x + dx[i] * direction[j], p.y + dy[i] * direction[j] };
 	return tmpp;
 }
 
 // look up the end in one direction.
-Point get_end(Point p, uint8_t i, uint8_t j, uint8_t color, Board *local_board) {// look up the end in one direction.
+inline Point get_end(Point p, uint8_t i, uint8_t j, uint8_t color, Board *local_board) {// look up the end in one direction.
 	Point end = p;
 	Point tmpp = move(p, i, j);
 	uint8_t len = 1;
@@ -183,7 +183,7 @@ inline uint8_t comaprepoint(Point A, Point B) {
 }
 
 // parse the line with the specified ends
-uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board *local_board) {
+inline uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board *local_board) {
 	Point tmpp = start;
 	uint16_t id = 1;
 	while (!comaprepoint(tmpp, end)) {
@@ -195,7 +195,7 @@ uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board *loc
 }
 
 //The function that calls the former ones that to get the id.
-pieceid lookup(Point p, uint8_t color, Board *local_board) {
+inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
 	uint8_t save = (*local_board).location[p.x][p.y];
 	(*local_board).location[p.x][p.y] = color;
 	pieceid id = {0};
@@ -208,7 +208,7 @@ pieceid lookup(Point p, uint8_t color, Board *local_board) {
 }
 
 //Translate id 2 distance
-distance id2dis(Point p, uint8_t color, Board *local_board) {
+inline distance id2dis(Point p, uint8_t color, Board *local_board) {
 	pieceid id = lookup(p, color,local_board);
 	distance dis;
 	for (uint8_t i = 0; i < 4; i++) {
