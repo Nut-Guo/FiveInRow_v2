@@ -6,6 +6,7 @@
 #include "five_type.h"
 #include "five_global.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
 	4 directions.
@@ -160,39 +161,49 @@ const uint8_t dis2five[1024] =
 
 extern inline uint8_t verify_location(Point p);
 // move one step in the specific direction
-extern inline Point move(Point p, uint8_t i, uint8_t j) {
-	Point tmpp = { p.x + dx[i] * direction[j], p.y + dy[i] * direction[j] };
-	return tmpp;
+extern inline void move(Point* p, uint8_t i, uint8_t j) {
+	(*p).x += dx[i] * direction[j];
+	(*p).y += dy[i] * direction[j];
 }
 
+uint8_t len[2];
+uint16_t line[2];
 // look up the end in one direction.
-inline Point get_end(Point p, uint8_t i, uint8_t j, uint8_t color, Board *local_board) {// look up the end in one direction.
-	Point end = p;
-	Point tmpp = move(p, i, j);
-	uint8_t len = 1;
-	while (verify_location(tmpp) && ((*local_board).location[tmpp.x][tmpp.y] == color || (*local_board).location[tmpp.x][tmpp.y] > 3) && len < 5) {
-		end = tmpp;
-		++len;
-		tmpp = move(tmpp, i, j);
+inline uint16_t parse_line(Point p, uint8_t i, uint8_t color, Board *local_board) {// look up the end in one direction.
+	Point tmpp = p;
+	uint16_t line = 1;
+	uint8_t len[2] = { 0 };
+	move(&p, i, 0);
+	while (verify_location(p) && ((*local_board).location[p.x][p.y] == color || (*local_board).location[p.x][p.y] > 3) && len[0] < 4) {
+		line = (line << 1) + ((*local_board).location[p.x][p.y] == color);
+		++len[0];
+		move(&p, i, 0);
 	}
-	return end;
+	move(&tmpp, i, 1);
+	while (verify_location(tmpp) && ((*local_board).location[tmpp.x][tmpp.y] == color || (*local_board).location[tmpp.x][tmpp.y] > 3) && len[1] < 4) {
+		line ^= (((*local_board).location[tmpp.x][tmpp.y] == color) << (len[0] + len[1] + 1));
+		++len[1];
+		move(&tmpp, i, 1);
+	}
+	line ^= (1 << (len[0] + len[1] + 1));
+	return line;
 }
 
+/*
 inline uint8_t comaprepoint(Point A, Point B) {
 	return (A.x == B.x) && (A.y == B.y);
 }
-
 // parse the line with the specified ends
-inline uint16_t parse_line(Point start, Point end, uint8_t d, uint8_t color, Board *local_board) {
-	Point tmpp = start;
+inline uint16_t parse_line(Point* start, Point* end, uint8_t d, uint8_t color, Board *local_board) {
 	uint16_t id = 1;
-	while (!comaprepoint(tmpp, end)) {
-		id = (id << 1) + ((*local_board).location[tmpp.x][tmpp.y] == color);
-		tmpp = move(tmpp, d, 1);
+	while (!comaprepoint(*start, *end)) {
+		id = (id << 1) + ((*local_board).location[(*start).x][(*end).y] == color);
+		move(start, d, 1);
 	}
-	id = (id << 1) + ((*local_board).location[tmpp.x][tmpp.y] == color);
+	id = (id << 1) + ((*local_board).location[(*start).x][(*start).y] == color);
 	return id;
 }
+*/
 
 //The function that calls the former ones that to get the id.
 inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
@@ -200,8 +211,7 @@ inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
 	(*local_board).location[p.x][p.y] = color;
 	pieceid id = {0};
 	for (uint8_t i = 0; i < 4; i++) {// look up in the four directions;
-		Point end[2] = { get_end(p, i, 0, color, local_board), get_end(p, i, 1, color,local_board) };
-		id.id[i] = parse_line(end[0], end[1], i, color,local_board);
+		id.id[i] = parse_line(p, i, color, local_board);
 	}
 	(*local_board).location[p.x][p.y] = save;
 	return id;
@@ -218,12 +228,8 @@ inline distance id2dis(Point p, uint8_t color, Board *local_board) {
 	return dis;
 }
 
-inline uint8_t min(uint8_t x, uint8_t y) {
-	return x < y ? x : y;
-}
-
 uint8_t mini[2];//store the min direction of 4 and 5;
-void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
+inline void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
 {
 	uint8_t i, j, temp;
 	for (i = 0; i < 2; i++)
@@ -246,7 +252,7 @@ void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
 	}
 }
 
-disvec getvec(Point p, uint8_t color, Board *local_board) {
+extern inline disvec getvec(Point p, uint8_t color, Board *local_board) {
 	distance dis = id2dis(p,color,local_board);
 	//sort the dis;
 	uint8_t mindis40 = 10;

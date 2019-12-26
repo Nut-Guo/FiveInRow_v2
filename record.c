@@ -3,6 +3,7 @@
 #include <io.h>
 #include <conio.h>
 #include <string.h>
+#include <windows.h>
 #include "five_global.h"
 
 extern char stop;
@@ -85,6 +86,7 @@ void record_menu(FILE* archive, int *counter) {
 	case('a'):
 		while (Round < *counter) {
 			load_piece(archive,counter);
+			Sleep(1000);
 		}
 		record_menu(archive, counter);
 		break;

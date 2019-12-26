@@ -23,30 +23,35 @@ typedef struct {
 	Point_info info[255];
 }InfoPOOL;
 
-extern Value_Table local_value[2];
-extern disvec getvec(Point p, uint8_t color, Board *local_board);
-extern inline Point move(Point p, uint8_t i, uint8_t j);
+extern inline disvec getvec(Point p, uint8_t color, Board *local_board);
+extern inline void move(Point *p, uint8_t i, uint8_t j);
 extern inline uint8_t verify_location(Point p);
 extern uint8_t SCOPE;
-
+extern Value_Table local_value[2];
 uint8_t poolcnt = 0;
 Board empty_surroundings = { {0} };
-
-inline uint8_t check_ban(disvec* vec, uint8_t color) {
+uint8_t Ban_flag = 0;
+extern inline uint8_t check_ban(disvec* vec, uint8_t color) {
 	if (!color) {
 		for (uint8_t i = 3; i < 6; i++) {
-			if (!(*vec).form[i]) 
+			if (!(*vec).form[i]) {
+				Ban_flag = 1;
 				return 1;
+			}
 		}
 	}
 	else {
-		if (!(*vec).form[5]) return 1;
+		if (!(*vec).form[5]) {
+			Ban_flag = 1;
+			return 1;
+		}
 	}
+	Ban_flag = 0;
 	return 0;
 }
 
 /*Check if the game should stop*/
-uint8_t check(Point p, uint8_t color, Board* local_board) {
+extern inline uint8_t check(Point p, uint8_t color, Board* local_board) {
 	for (uint8_t i = 0; i < Round; i++) {
 		if (board.location[PieceOnBoard.record[i].x][PieceOnBoard.record[i].y] == color) {
 			disvec tmpvec = getvec(PieceOnBoard.record[i], color, local_board);
@@ -61,7 +66,7 @@ uint8_t check(Point p, uint8_t color, Board* local_board) {
 	return 0;
 }
 
-uint8_t check_win(disvec* vec, uint8_t color) {
+extern inline uint8_t check_win(disvec* vec, uint8_t color) {
 	//disvec vec = getvec(p, color, local_board);
 	if (check_ban(vec, color)) {
 		return 0;
@@ -79,12 +84,14 @@ uint8_t check_win(disvec* vec, uint8_t color) {
 	return 0;
 }
 
-int16_t get_value(Point p, uint8_t color, Board* local_board) {
+extern inline int16_t get_value(Point p, uint8_t color, Board* local_board) {
 	disvec vec = getvec(p, color, local_board);
 	int16_t win_value = 0;
 	int16_t value = 0;
-	if (check_ban(&vec, color))return 0;
-	if (win_value = check_win(&vec, color)) {
+	win_value = check_win(&vec, color);
+	if (Ban_flag)
+		return 0;
+	if (win_value) {
 		value += (INT16_MAX >> 1) + (INT16_MAX >> (win_value + 1));
 		return value;
 	}
@@ -98,7 +105,7 @@ int16_t get_value(Point p, uint8_t color, Board* local_board) {
 	return value;
 }
 
-inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
+extern inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	Board surroundings = empty_surroundings;
 	for (uint8_t k = 0; k < localRound; k++) {
 		Point p = (*PieceOnBoard).record[k];
@@ -106,7 +113,7 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 			for (uint8_t j = 0; j < 2; j++) {
 				Point tmpp = p;
 				for (uint8_t l = 0; l < SCOPE; l++) {
-					tmpp = move(tmpp, i, j);
+					move(&tmpp, i, j);
 					if (verify_location(tmpp) && 
 						(*local_board).location[tmpp.x][tmpp.y] > 2)
 						surroundings.location[tmpp.x][tmpp.y] = 1;
@@ -117,7 +124,7 @@ inline Board get_surroundings(POOL *PieceOnBoard, uint8_t localRound, Board *loc
 	return surroundings;
 }
 
-POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
+extern inline POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	Board surroundings = get_surroundings(PieceOnBoard,localRound,local_board);
 	POOL pool = { {0,0} };
 	poolcnt = 0;
@@ -131,14 +138,15 @@ POOL get_pool(POOL *PieceOnBoard, uint8_t localRound, Board *local_board) {
 	return pool;
 }
 
-uint8_t iskill(Point p, uint8_t color, Board* local_board) {
+extern inline uint8_t iskill(Point p, uint8_t color, Board* local_board) {
 	disvec vec = getvec(p, color, local_board);
+	if (check_ban(&vec, color))return 0;
 	if (vec.form[1] <= 1) return 1;
 	if (vec.form[0] <= 1) return 2;
 	return 0;
 }
 
-POOL get_seq_kill(POOL* eva_pool, uint8_t color, uint8_t localRound, Board* local_board) {
+extern inline POOL get_seq_kill(POOL* eva_pool, uint8_t color, uint8_t localRound, Board* local_board) {
 	uint8_t cnt = 0;
 	POOL seq = { {0,0} };
 	for (uint8_t i = 0; i < poolcnt; i++) {
@@ -150,7 +158,7 @@ POOL get_seq_kill(POOL* eva_pool, uint8_t color, uint8_t localRound, Board* loca
 	return seq;
 }
 
-InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
+extern inline InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
 	InfoPOOL infop = { 0 };
 	for (uint8_t i = 0; i < poolcnt; i++) {
 		Point tmpp = (*pool).record[i];
@@ -160,7 +168,7 @@ InfoPOOL get_info(POOL* pool, uint8_t color, Board * local_board) {
 	return infop;
 }
 
-void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len, uint8_t cnt, Board* local_board) {
+extern inline void ssort_pool(InfoPOOL* r, uint8_t color, uint8_t len, uint8_t cnt, Board* local_board) {
 	uint8_t i, j;
 	Point_info temp;
 	for (i = 0; i < len; i++)

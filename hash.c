@@ -9,7 +9,7 @@ typedef struct {
 
 Hashtable Zobrist;
 
-void init_zobrist() {
+extern inline void init_zobrist() {
     for (int16_t i = 0; i < 15; i++) {
         for (int16_t j = 0; j < 15; j++) {
             Zobrist[0][i][j] = rand() & 0xfff;
@@ -18,7 +18,7 @@ void init_zobrist() {
     }
 }
 
-HASH calc_hash(Point p, HASH origin_hash, uint8_t color) {
+extern inline HASH calc_hash(Point p, HASH origin_hash, uint8_t color) {
     HASH hash = { (origin_hash.hash[0] ^ Zobrist[color][p.x][p.y]) & 4095, (origin_hash.hash[1] ^ Zobrist[!color][p.x][p.y]) & 4095 };
     return hash;
 }

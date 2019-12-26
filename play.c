@@ -3,6 +3,7 @@
 #include <string.h>
 #include <conio.h>
 #include <io.h>
+#include <time.h>
 #include "five_type.h"
 #include "five_global.h"
 #include "five_func.h"
@@ -14,14 +15,14 @@ uint8_t stop = 0;
 Board board;
 POOL PieceOnBoard;
 
-extern uint8_t check(Point p, uint8_t color, Board *local_board);
-extern void print_record();
-extern void init_zobrist();
+extern inline uint8_t check(Point p, uint8_t color, Board *local_board);
+extern inline void print_record();
+extern inline void init_zobrist();
 extern void(*Play[])(Point(*P1)(), Point(*P2)());
 extern Point(*Input[])();
 
 /*Print the board and the present state.*/
-void print_board(Board *board)
+extern inline void print_board(Board *board)
 {
 	system("cls");
 	for (int i = 0; i <= 14; i++)
@@ -37,7 +38,7 @@ void print_board(Board *board)
 }
 
 /*Init the board for the next game.*/
-void init_board()
+inline void init_board()
 {
 	player = 0;
 	Round = 0;
@@ -56,7 +57,7 @@ extern inline uint8_t verify_location(Point p)
 }
 
 /*Drop the piece at the given place.*/
-uint8_t drop(Point P)
+extern inline uint8_t drop(Point P)
 {
 	board.location[P.x][P.y] = player + 2;
 	print_board(&board);
@@ -67,14 +68,14 @@ uint8_t drop(Point P)
 }
 
 /*Set the initial state and start the game.*/
-void new_game(Point(*P1)(Point last), Point(*P2)(Point last))
+extern inline void new_game(Point(*P1)(Point last), Point(*P2)(Point last))
 {
 	init_board();
 	stop = 0;
 	play(*P1, *P2);
 }
 
-void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
+extern inline void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
 {
 	stop = 0;
 	player = Round % 2;
@@ -84,18 +85,28 @@ void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
 /*Control the game state, let the player drop piece in turn and decide if the game should stop.*/
 void play(Point(*P1)(Point last), Point(*P2)(Point last))
 {
+	clock_t start, finish;
+	float duration;
 	Point piece = { 7,7 };
 	while (Round < 15 * 15 && !stop) {
 		printf("Player: %d\n", 1 + player);
 		if (!player) {
+			start = clock();
 			piece = (*P1)(piece);
+			finish = clock();
+			duration = (float)(finish - start) / CLOCKS_PER_SEC;
 			if (stop = drop(piece))
 				break;
+			printf("Time spent by Player1: %fs\n", duration);
 		}
 		else {
+			start = clock();
 			piece = (*P2)(piece);
+			finish = clock();
+			duration = (float)(finish - start) / CLOCKS_PER_SEC;
 			if (stop = drop(piece))
 				break;
+			printf("Time spent by Player2: %fs\n", duration);
 		}
 		player ^= 1;
 	}
@@ -103,7 +114,7 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 		printf("Draw!\n");
 	else
 		printf("The winner is Player%d!\nCongratulations!\n", player + 1);
-	printf("Press (q) to quit.Press (r) to get the record or anything else to play again.\n");
+	printf("Quit(q) \t Record(r)\tMenu(else)\n");
 	char c;
 	c = _getch();
 	switch (c) {

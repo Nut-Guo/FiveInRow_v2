@@ -6,7 +6,7 @@
 #include "five_global.h"
 #include "five_type.h"
 
-extern inline uint8_t verify_location(Point p);
+extern uint8_t verify_location(Point p);
 
 Point user(Point last)
 {

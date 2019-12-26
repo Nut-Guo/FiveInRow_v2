@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 	while (1) {
 		system("cls");
 		printf("Welcome to the FiveInRow game!\n");
-		printf("\tVersion: 0.3\n");
+		printf("\tVersion: 1.0\n\tQin Siliang\n");
 		printf("New game(n)\tLoad archive(a)\n");
 		switch (_getch()) {
 		case 'n':
