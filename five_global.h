@@ -9,7 +9,7 @@
 extern uint8_t player;
 extern uint8_t Round;
 extern Board board;
-extern POOL PieceOnBoard;
+extern Pool PieceOnBoard;
 
 extern const uint8_t dx[4];
 extern const uint8_t dy[4];

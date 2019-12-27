@@ -17,4 +17,4 @@ typedef struct {
 
 typedef struct {
 	Point record[225];
-}POOL;
+}Pool;

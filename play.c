@@ -13,7 +13,7 @@ uint8_t player = 0;
 uint8_t Round = 0;
 uint8_t stop = 0;
 Board board;
-POOL PieceOnBoard;
+Pool PieceOnBoard;
 
 extern inline uint8_t check(Point p, uint8_t color, Board *local_board);
 extern inline void print_record();

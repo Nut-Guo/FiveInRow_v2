@@ -86,7 +86,6 @@ void record_menu(FILE* archive, int *counter) {
 	case('a'):
 		while (Round < *counter) {
 			load_piece(archive,counter);
-			Sleep(1000);
 		}
 		record_menu(archive, counter);
 		break;

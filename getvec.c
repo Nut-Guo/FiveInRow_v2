@@ -25,7 +25,7 @@ typedef struct {
 
 typedef struct {
 	uint8_t form[6];
-}disvec;
+}Disvec;
 
 const uint8_t dis2four[1024] = 
 {		
@@ -236,7 +236,7 @@ inline void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
 	}
 }
 
-extern inline disvec getvec(Point p, uint8_t color, Board *local_board) {
+extern inline Disvec getvec(Point p, uint8_t color, Board *local_board) {
 	distance dis = id2dis(p,color,local_board);
 	//sort the dis;
 	uint8_t mindis40 = 10;
@@ -278,6 +278,6 @@ extern inline disvec getvec(Point p, uint8_t color, Board *local_board) {
 	if (!mindis34) {
 		mindisd3 = 10;
 	}
-	disvec vec = { { mindis50,mindis40,mindis34,mindisd4,mindisd3,longline} };
+	Disvec vec = { { mindis50,mindis40,mindis34,mindisd4,mindisd3,longline} };
 	return vec;
 }
