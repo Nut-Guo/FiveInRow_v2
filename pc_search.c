@@ -92,7 +92,7 @@ int16_t Block(Point p, uint8_t color, Board* local_board) {
 	//Test thenew pool;
 	uint8_t left = 0;
 	Board local_surroundings = surroundings;
-	while (opinfo_pool.info[left].value > (INT16_MAX >> 10)) {
+	while (opinfo_pool.info[left].value > (INT16_MAX >> 1)) {
 		Point tryp = *opinfo_pool.info[left].point;
 		(*local_board).location[tryp.x][tryp.y] = color;
 		local_PieceOnBoard.record[local_Round++] = tryp;
@@ -122,8 +122,24 @@ int16_t Block(Point p, uint8_t color, Board* local_board) {
 	}
 }
 
+void get_block(Info_Pool* opinfo_pool, uint8_t color, Board* board) {
+	uint8_t i = 0;
+	int16_t left_max = 1;
+	int16_t tmp_left = 0;
+	Point bestP = *(*opinfo_pool).info[i].point;
+	while ((*opinfo_pool).info[i].value > (INT16_MAX >> 1)) {
+		Point tmpp = *(*opinfo_pool).info[i].point;
+		tmp_left = Block(tmpp, color, &local_board);
+		if (tmp_left > left_max) {
+			left_max = tmp_left;
+			bestP = BlockReturn;
+		}
+		i++;
+	}
+	BlockReturn = bestP;
+}
+
 void get_best_block(Info_Pool *opinfo_pool, uint8_t color, Board *board) {
-	uint8_t imax = 0;
 	uint8_t i = 0;
 	int16_t left_max = 1;
 	int16_t tmp_left = 0;
@@ -247,10 +263,6 @@ int16_t ABsearch(Info_Pool* info_pool, int32_t* extreme, uint8_t ab, int16_t AB,
 		if ((*info_pool).info[0].value > INT16_MAX >> 1 && (*info_pool).info[i].value < INT16_MAX >> 1) break;
 		int16_t tmp_value = 0;
 		tmpp = *(*info_pool).info[i].point;
-		/*
-		Disvec vec = getvec(tmpp, (!ab) ^ player, &local_board);
-		if(check_ban(&vec, (!ab) ^ player)) continue;
-		*/
 		if (!local_value[(!ab) ^ player].value[tmpp.x][tmpp.y]) continue;
 		local_board.location[tmpp.x][tmpp.y] = (!ab) ^ player;
 		local_PieceOnBoard.record[local_Round++] = tmpp;
@@ -305,8 +317,8 @@ int16_t search(uint8_t ab, int16_t AB, uint8_t depth, HASH srchash) {
 	Board local_surroundings = surroundings;
 	Info_Pool myinfo_pool = get_info(&local_eva_pool, (!ab) ^ player, &local_board);
 	ssort_pool(&myinfo_pool, (!ab) ^ player, min(WIDTH,cnt-1), cnt, &local_board);
-	Info_Pool opinfo_pool = get_info(&local_eva_pool, !((!ab) ^ player), &local_board);
-	ssort_pool(&opinfo_pool, !((!ab) ^ player), min(WIDTH,cnt-1), cnt, &local_board);
+	Info_Pool opinfo_pool = get_info(&local_eva_pool, ab ^ player, &local_board);
+	ssort_pool(&opinfo_pool,ab ^ player, min(WIDTH,cnt-1), cnt, &local_board);
 	int16_t tmp_value = 0;
 	if (depth == MAXDEPTH) Preturn = *opinfo_pool.info[0].point;
 	//Predecide if something trivial;
@@ -378,9 +390,9 @@ Point search_point(Point last) {
 	else {
 		SCOPE = 2;
 		MAXDEPTH = 3;//PC_MAXDEPTH[player];
-		WIDTH = 20;
+		WIDTH = 10;
 	}
-	KILL_DEPTH = 4;
+	KILL_DEPTH = 8;
 	search(1, INT16_MIN, MAXDEPTH, init_hash);
 	local_board.location[Preturn.x][Preturn.y] = player;
 	return Preturn;
