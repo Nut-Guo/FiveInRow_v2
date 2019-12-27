@@ -189,22 +189,6 @@ inline uint16_t parse_line(Point p, uint8_t i, uint8_t color, Board *local_board
 	return line;
 }
 
-/*
-inline uint8_t comaprepoint(Point A, Point B) {
-	return (A.x == B.x) && (A.y == B.y);
-}
-// parse the line with the specified ends
-inline uint16_t parse_line(Point* start, Point* end, uint8_t d, uint8_t color, Board *local_board) {
-	uint16_t id = 1;
-	while (!comaprepoint(*start, *end)) {
-		id = (id << 1) + ((*local_board).location[(*start).x][(*end).y] == color);
-		move(start, d, 1);
-	}
-	id = (id << 1) + ((*local_board).location[(*start).x][(*start).y] == color);
-	return id;
-}
-*/
-
 //The function that calls the former ones that to get the id.
 inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
 	uint8_t save = (*local_board).location[p.x][p.y];
