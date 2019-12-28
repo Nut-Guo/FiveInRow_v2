@@ -44,7 +44,7 @@ uint8_t poolcnt = 0; //Pass the length of the Info_pool.
 Board empty_surroundings = { {0} }; //Board used to identify the empty point around the current pieces.
 uint8_t Ban_flag = 0;//Pass the baned infomation.
 Board surroundings;//Board used to store the surroundings indicator.
-
+int32_t global_value[15][15];
 /*
 	Check if this step makes a ban.
 */
@@ -89,15 +89,10 @@ extern inline uint8_t check_win(Disvec* vec, uint8_t color) {
 	if (check_ban(vec, color)) {
 		return 0;
 	};
-	for (uint8_t i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 2; i++) {
 		if ((*vec).form[i] == 0) {
 			return i + 1;
 		}
-	}
-	if (color)
-	{
-		if ((*vec).form[3] == 0) return 4;
-		if ((*vec).form[4] == 0) return 5;
 	}
 	return 0;
 }
@@ -117,13 +112,34 @@ extern inline int16_t get_value(Point p, uint8_t color, Board* local_board) {
 		return value;
 	}
 	value += vec.form[0] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[0])) : 0;
-	value += vec.form[1] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[1])) : 0;
+	value += vec.form[1] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[1])) : 0; 
 	value += vec.form[2] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[2])) : 0;
 	if (color) {
 		value += vec.form[3] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[3])) : 0;
 		value += vec.form[4] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[4])) : 0;
 	}
 	return value;
+}
+
+/*
+	Get the value of the point already on board.
+*/
+extern inline void get_on_board_value(Point p, uint8_t color, Board* local_board) {
+	Disvec vec = getvec(p, color, local_board);
+	global_value[p.x][p.y] = 0;
+	int32_t tmp;
+	tmp = vec.form[0] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[0])) : 0;
+	global_value[p.x][p.y] += tmp / (5 - vec.form[0]);
+	tmp = vec.form[1] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[1])) : 0;
+	global_value[p.x][p.y] += tmp / (4 - vec.form[1]);
+	tmp = vec.form[2] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[2])) : 0;
+	global_value[p.x][p.y] += tmp / (7 - vec.form[2]);
+	if (color) {
+		tmp = vec.form[3] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[3])) : 0;
+		global_value[p.x][p.y] = tmp / (8 - vec.form[3]);
+		tmp = vec.form[4] < 4 ? INT16_MAX >> ((8 + 2 * vec.form[4])) : 0;
+		global_value[p.x][p.y] = tmp / (6 - vec.form[4]);
+	}
 }
 
 /*
@@ -173,12 +189,12 @@ extern inline uint8_t iskill(Point p, uint8_t color, Board* local_board) {
 	if (check_ban(&vec, color))return 0;
 	uint8_t i = 0;
 	while(i < 3) {
-		if (vec.form[i++] <= 1) return 1;
+		if (vec.form[i++] <= 1) return i;
 	}
 	if (color) {
 		while(i < 6) 
 			if (vec.form[i++] <= 1) 
-				return 1;
+				return i;
 	}
 	return 0;
 }

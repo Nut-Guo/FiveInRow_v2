@@ -51,3 +51,5 @@ extern inline HASH calc_hash(Point p, HASH origin_hash, uint8_t color);
 extern inline uint8_t iskill(Point p, uint8_t color, Board* local_board);
 
 extern inline uint8_t check_ban(Disvec* vec, uint8_t color);
+
+extern inline void get_on_board_value(Point p, uint8_t color, Board* local_board);

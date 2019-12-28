@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <conio.h>
 #include <time.h>
+#include <stdlib.h>
+#include <windows.h>
 #include "five_type.h"
 #include "five_global.h"
 #include "five_func.h"
@@ -47,6 +49,7 @@ inline void init_board()
 	board = empty;
 	print_board(&board);
 	init_zobrist();
+	system("color 0");
 }
 
 /*
