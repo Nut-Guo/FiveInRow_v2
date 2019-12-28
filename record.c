@@ -16,6 +16,9 @@ extern void init_board();
 extern void print_board(Board *board);
 void record_menu(FILE* archive, int* counter);
 
+/*
+	Save the record.
+*/
 void record() {
 	printf("Please specify the filename:");
 	char filename[20];
@@ -43,6 +46,9 @@ void record() {
 	}
 }
 
+/*
+	Print the record to the screen.
+*/
 void print_record() {
 	record();
 	printf("Round Player1 Player2\n");
@@ -58,12 +64,18 @@ void print_record() {
 		exit(0);
 }
 
+/*
+	Go back one step.
+*/
 void revert() {
 	Point p = PieceOnBoard.record[--Round];
 	board.location[p.x][p.y] = empty.location[p.y][p.y];
 	print_board(&board);
 }
 
+/*
+	Go foward one step.
+*/
 void load_piece(FILE* archive, int* counter) {
 	if ((*counter) == Round) {
 		print_board(&board);
@@ -75,6 +87,9 @@ void load_piece(FILE* archive, int* counter) {
 	stop = drop(p);
 }
 
+/*
+	Print the menu.
+*/
 void record_menu(FILE* archive, int *counter) {
 	printf("Total Round: %d\n", *counter);
 	printf("Step(s)\tLoad_all(a)\tContinue(c)\tRevert(r)\tQuit(q)\tMenu(else)\n");
@@ -105,6 +120,9 @@ void record_menu(FILE* archive, int *counter) {
 	}
 }
 
+/*
+	Load the record file.
+*/
 void load_record(char* name) {
 	char filepath[120] = { 0 };
 	sprintf_s(filepath, 120, "%s%s%s", cwd, "\\History\\", name);
@@ -138,6 +156,9 @@ void load_record(char* name) {
 	}
 }
 
+/*
+	Choose the record file.
+*/
 void get_the_record() {
 	char num = 0;
 	char name[100][20] = { 0 };

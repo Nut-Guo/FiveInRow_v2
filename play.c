@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <conio.h>
-#include <io.h>
 #include <time.h>
 #include "five_type.h"
 #include "five_global.h"
@@ -21,7 +18,9 @@ extern inline void init_zobrist();
 extern void(*Play[])(Point(*P1)(), Point(*P2)());
 extern Point(*Input[])();
 
-/*Print the board and the present state.*/
+/*
+	Print the board and the present state.
+*/
 extern inline void print_board(Board *board)
 {
 	system("cls");
@@ -37,7 +36,9 @@ extern inline void print_board(Board *board)
 	printf("   A B C D E F G H I J K L M N O \n");
 }
 
-/*Init the board for the next game.*/
+/*
+	Init the board for the next game.
+*/
 inline void init_board()
 {
 	player = 0;
@@ -48,7 +49,9 @@ inline void init_board()
 	init_zobrist();
 }
 
-/*Varify the location*/
+/*
+	Varify the location
+*/
 extern inline uint8_t verify_location(Point p)
 {
 	if (p.x >= 0 && p.x <= 14 && p.y >= 0 && p.y <= 14)
@@ -56,7 +59,9 @@ extern inline uint8_t verify_location(Point p)
 	return 0;
 }
 
-/*Drop the piece at the given place.*/
+/*
+	Drop the piece at the given place.
+*/
 extern inline uint8_t drop(Point P)
 {
 	board.location[P.x][P.y] = player + 2;
@@ -67,7 +72,9 @@ extern inline uint8_t drop(Point P)
 	return check(P,player,&board);
 }
 
-/*Set the initial state and start the game.*/
+/*
+	Set the initial state and start the game.
+*/
 extern inline void new_game(Point(*P1)(Point last), Point(*P2)(Point last))
 {
 	init_board();
@@ -75,6 +82,9 @@ extern inline void new_game(Point(*P1)(Point last), Point(*P2)(Point last))
 	play(*P1, *P2);
 }
 
+/*
+	Continue the game from a record;
+*/
 extern inline void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
 {
 	stop = 0;
@@ -82,7 +92,10 @@ extern inline void continue_game(Point(*P1)(Point last), Point(*P2)(Point last))
 	play(*P1, *P2);
 }
 
-/*Control the game state, let the player drop piece in turn and decide if the game should stop.*/
+/*
+	Control the game state, let the player drop piece in turn 
+	and decide if the game should stop.
+*/
 void play(Point(*P1)(Point last), Point(*P2)(Point last))
 {
 	clock_t start, finish;
@@ -97,7 +110,7 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 			duration = (float)(finish - start) / CLOCKS_PER_SEC;
 			if (stop = drop(piece))
 				break;
-			printf("Time spent by Player1: %fs\n", duration);
+			printf("Time spent by Player1: %.3fs\n", duration);
 		}
 		else {
 			start = clock();
@@ -106,7 +119,7 @@ void play(Point(*P1)(Point last), Point(*P2)(Point last))
 			duration = (float)(finish - start) / CLOCKS_PER_SEC;
 			if (stop = drop(piece))
 				break;
-			printf("Time spent by Player2: %fs\n", duration);
+			printf("Time spent by Player2: %.3fs\n", duration);
 		}
 		player ^= 1;
 	}

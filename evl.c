@@ -71,17 +71,13 @@ extern inline uint8_t check_ban(Disvec* vec, uint8_t color) {
 	Check if the game should stop
 */
 extern inline uint8_t check(Point p, uint8_t color, Board* local_board) {
-	for (uint8_t i = 0; i < Round; i++) {
-		if (board.location[PieceOnBoard.record[i].x][PieceOnBoard.record[i].y] == color) {
-			Disvec tmpvec = getvec(PieceOnBoard.record[i], color, local_board);
-			if (check_ban(&tmpvec, color)) {
-				printf("Ban triggered!\n");
-				player = !player;
-				return 1;
-			}
-			if (tmpvec.form[0] == 0) return 1;
-		}
-	};
+	Disvec tmpvec = getvec(p, color, local_board);
+	if (check_ban(&tmpvec, color)) {
+		printf("Ban triggered!\n");
+		player = !player;
+		return 1;
+	}
+	if (tmpvec.form[0] == 0) return 1;
 	return 0;
 }
 
@@ -175,11 +171,21 @@ extern inline Pool get_pool(Pool *PieceOnBoard, uint8_t local_Round, Board *loca
 extern inline uint8_t iskill(Point p, uint8_t color, Board* local_board) {
 	Disvec vec = getvec(p, color, local_board);
 	if (check_ban(&vec, color))return 0;
-	if (vec.form[1] <= 1) return 1;
-	if (vec.form[0] <= 1) return 2;
+	uint8_t i = 0;
+	while(i < 3) {
+		if (vec.form[i++] <= 1) return 1;
+	}
+	if (color) {
+		while(i < 6) 
+			if (vec.form[i++] <= 1) 
+				return 1;
+	}
 	return 0;
 }
 
+/*
+	Get the points that could be used in the kill sequence.
+*/
 extern inline Pool get_seq_kill(Pool* eva_pool, uint8_t color, uint8_t localRound, Board* local_board) {
 	uint8_t cnt = 0;
 	Pool seq = { {0,0} };
@@ -192,6 +198,9 @@ extern inline Pool get_seq_kill(Pool* eva_pool, uint8_t color, uint8_t localRoun
 	return seq;
 }
 
+/*
+	Get the value-point pairs.
+*/
 extern inline Info_Pool get_info(Pool* pool, uint8_t color, Board * local_board) {
 	Info_Pool infop = { 0 };
 	for (uint8_t i = 0; i < poolcnt; i++) {
@@ -202,6 +211,9 @@ extern inline Info_Pool get_info(Pool* pool, uint8_t color, Board * local_board)
 	return infop;
 }
 
+/*
+	Sort the info pairs.
+*/
 extern inline void ssort_pool(Info_Pool* r, uint8_t color, uint8_t len, uint8_t cnt, Board* local_board) {
 	uint8_t i, j;
 	Point_Info temp;

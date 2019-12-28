@@ -9,6 +9,9 @@ typedef struct {
 
 Hashtable Zobrist;
 
+/*
+    Init the Zobrist hash table.
+*/
 extern inline void init_zobrist() {
     for (int16_t i = 0; i < 15; i++) {
         for (int16_t j = 0; j < 15; j++) {
@@ -18,6 +21,9 @@ extern inline void init_zobrist() {
     }
 }
 
+/*
+    Update the hash value of the current state.
+*/
 extern inline HASH calc_hash(Point p, HASH origin_hash, uint8_t color) {
     HASH hash = { (origin_hash.hash[0] ^ Zobrist[color][p.x][p.y]) & 4095, (origin_hash.hash[1] ^ Zobrist[!color][p.x][p.y]) & 4095 };
     return hash;

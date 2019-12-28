@@ -1,65 +1,66 @@
 #include "five_global.h"
 #include "five_type.h"
+#include "five_search.h"
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-	uint8_t form[6];
-}Disvec;
-typedef struct {
-	Point* point;
-	int16_t value;
-}Point_Info;
-typedef struct {
-	Point_Info info[255];
-}Info_Pool;
-typedef struct {
-	uint8_t distance[2][4];
-}distance;
-typedef struct {
-	uint16_t hash[2];
-}HASH;
-typedef struct {
-	int16_t value[15][15];
-}Value_Table;
-
-
-extern inline Pool get_pool(Pool *PieceOnBoard, uint8_t local_Round, Board *local_board);
-extern inline uint8_t check_win(Disvec* vec, uint8_t color);
-extern inline Disvec getvec(Point p, uint8_t color, Board* local_board);
-extern inline Info_Pool get_info(Pool* pool, uint8_t color, Board* local_board);
-extern inline void ssort_pool(Info_Pool* r, uint8_t color, uint8_t len, uint8_t cnt, Board* local_board);
-extern inline int16_t get_value(Point p, uint8_t color, Board* local_board);
-extern inline Pool get_seq_kill(Pool* eva_pool, uint8_t color, uint8_t localRound, Board* local_board);
-extern inline void move(Point* p, uint8_t i, uint8_t j);
-extern inline uint8_t verify_location(Point p);
-extern inline HASH calc_hash(Point p, HASH origin_hash, uint8_t color);
-extern inline uint8_t iskill(Point p, uint8_t color, Board* local_board);
-extern inline uint8_t check_ban(Disvec* vec, uint8_t color);
 int16_t search(uint8_t ab, int16_t AB, uint8_t depth, HASH srchash);
 
+/*
+	Useful intermediate variables.
+*/
 extern uint8_t poolcnt;
 extern Board surroundings;
+
+/*
+	The value table of black and white.
+*/
 Value_Table local_value[2] = { 0 };
+
+/*
+	Pass the return point of search.
+*/
 Point Preturn = { 7,7 };
+
+/*
+	Pass the return point of block.
+*/
 Point BlockReturn = { 7,7 };
+uint8_t blocked = 0;
+
+/*
+	Pass the return point of kill.
+*/
 Point KillReturn = { 7,7 };
+
+/*
+	Copies of global variables.
+*/
 Pool local_PieceOnBoard;
 uint8_t local_Round = 0;
 Board local_board;
+
+/*
+	Hash table and their checks.
+*/
 int16_t hash[4096][4096] = { 0 };
 uint16_t check_hash[4096][4096] = { 0 };
-uint16_t check_kill_hash[4096][4096] = { 0 };
 int16_t KILL_hash[4096][4096] = { 0 };
+uint16_t check_kill_hash[4096][4096] = { 0 };
+
+/*
+	Basic configuration of search.
+*/
 uint8_t MAXDEPTH = 7;
 uint8_t WIDTH = 5;
 uint8_t SCOPE = 2;
-uint8_t KILL_DEPTH = 8;
+uint8_t KILL_DEPTH = 5;
 uint32_t PC_MAXDEPTH[2] = { 3, 3 };
-Pool eva_pool;
 
-//Matain the value table;
-void update_value_table(Point p, Board* local_surroundings) {
+/*
+	Update the value table;
+*/
+inline void update_value_table(Point p, Board* local_surroundings) {
 	local_value[0].value[p.x][p.y] = get_value(p, 0, &local_board);
 	local_value[1].value[p.x][p.y] = get_value(p, 1, &local_board);
 	for (uint8_t i = 0; i < 4; i++) {
@@ -76,7 +77,10 @@ void update_value_table(Point p, Board* local_surroundings) {
 	}
 }
 
-int16_t Block(Point p, uint8_t color, Board* local_board) {
+/*
+	Find a block.
+*/
+inline int16_t Block(Point p, uint8_t color, Board* local_board) {
 	//Check if after block, there is still a kill; 
 	(*local_board).location[p.x][p.y] = color;
 	local_PieceOnBoard.record[local_Round++] = p;
@@ -109,12 +113,14 @@ int16_t Block(Point p, uint8_t color, Board* local_board) {
 		if (local_value[color].value[tryp.x][tryp.y] > deeper_opinfo_pool.info[0].value 
 			|| deeper_opinfo_pool.info[0].value < (INT16_MAX >> 1)) {
 			BlockReturn = tryp;
+			blocked = 1;
 			return local_value[color].value[tryp.x][tryp.y];
 		}
 		left++;
 	}
 	BlockReturn = p;
 	if (!left) {
+		blocked = 1;
 		return local_value[color].value[p.x][p.y];
 	}
 	else {
@@ -122,23 +128,22 @@ int16_t Block(Point p, uint8_t color, Board* local_board) {
 	}
 }
 
-void get_block(Info_Pool* opinfo_pool, uint8_t color, Board* board) {
+/*
+	Get a block to use in calculating the seqkill.
+*/
+inline uint8_t get_block(Info_Pool* opinfo_pool, uint8_t color, uint8_t blockcnt, Board* board) {
 	uint8_t i = 0;
-	int16_t left_max = 1;
-	int16_t tmp_left = 0;
-	Point bestP = *(*opinfo_pool).info[i].point;
-	while ((*opinfo_pool).info[i].value > (INT16_MAX >> 1)) {
-		Point tmpp = *(*opinfo_pool).info[i].point;
-		tmp_left = Block(tmpp, color, &local_board);
-		if (tmp_left > left_max) {
-			left_max = tmp_left;
-			bestP = BlockReturn;
-		}
+	blocked = 0;
+	while (!blocked && i < blockcnt) {
+		Block(*(*opinfo_pool).info[i].point, color, &local_board);
 		i++;
 	}
-	BlockReturn = bestP;
+	return blocked;
 }
 
+/*
+	Get the best block as next step.
+*/
 void get_best_block(Info_Pool *opinfo_pool, uint8_t color, Board *board) {
 	uint8_t i = 0;
 	int16_t left_max = 1;
@@ -156,6 +161,9 @@ void get_best_block(Info_Pool *opinfo_pool, uint8_t color, Board *board) {
 	BlockReturn = bestP;
 }
 
+/*
+	Evaluate the board.
+*/
 int16_t evaluate_the_board(uint8_t color) {
 	int16_t tmp_value = 0;
 	Pool value_pool = get_pool(&local_PieceOnBoard, local_Round, &local_board);
@@ -197,12 +205,12 @@ int16_t search_seq(uint8_t color, HASH srchash, int8_t depth) {
 	Pool eva_pool = get_pool(&local_PieceOnBoard, local_Round, &local_board);
 	Pool kill_pool = get_seq_kill(&eva_pool, color, local_Round, &local_board);
 	if (!depth) {
-		return evaluate_the_board(color);
+		return 0;//evaluate_the_board(color);
 	}
 	uint8_t cnt = poolcnt;
 	int16_t flag = 0;
 	if (cnt == 0)
-		return evaluate_the_board(color);
+		return 0;//evaluate_the_board(color);
 	for (uint8_t i = 0; i < cnt; i++) {
 		Point tmpp = kill_pool.record[i];
 		Disvec vec = getvec(tmpp, color, &local_board);
@@ -224,7 +232,12 @@ int16_t search_seq(uint8_t color, HASH srchash, int8_t depth) {
 		Info_Pool block_info_pool = get_info(&killed_pool, color, &local_board);
 		uint8_t blockcnt = poolcnt;
 		ssort_pool(&block_info_pool, color, 5, blockcnt, &local_board);
-		get_best_block(&block_info_pool, !color, &local_board);
+		if (!get_block(&block_info_pool, !color, blockcnt, &local_board)) {
+			local_Round--;
+			local_board.location[tmpp.x][tmpp.y] = empty.location[tmpp.x][tmpp.y];
+			KillReturn = tmpp;
+			return local_value[color].value[tmpp.x][tmpp.y];
+		}
 		Point blockp = BlockReturn;
 		vec = getvec(blockp, !color, &local_board);
 		if (check_win(&vec, !color)||(iskill(blockp,!color,&local_board))) {
@@ -256,6 +269,9 @@ int16_t search_seq(uint8_t color, HASH srchash, int8_t depth) {
 	return local_max;
 }
 
+/*
+	Search with alpha-beta cutoffs.
+*/
 int16_t ABsearch(Info_Pool* info_pool, int32_t* extreme, uint8_t ab, int16_t AB, uint8_t depth, HASH srchash, uint8_t cnt, Board* local_surroundings) {
 	int16_t localAB = ab ? INT16_MIN : INT16_MAX;
 	Point tmpp;
@@ -311,6 +327,9 @@ int16_t ABsearch(Info_Pool* info_pool, int32_t* extreme, uint8_t ab, int16_t AB,
 	return (*extreme);
 }
 
+/*
+	Coordinate multiple search strategies.
+*/
 int16_t search(uint8_t ab, int16_t AB, uint8_t depth, HASH srchash) {
 	Pool local_eva_pool = get_pool(&local_PieceOnBoard, local_Round, &local_board);
 	uint8_t cnt = poolcnt;
@@ -333,17 +352,24 @@ int16_t search(uint8_t ab, int16_t AB, uint8_t depth, HASH srchash) {
 	int32_t extreme = ab ? INT16_MIN : INT16_MAX;
 	//If not threatened, get a tragedy;
 	if (opinfo_pool.info[0].value <= myinfo_pool.info[0].value && myinfo_pool.info[7].value > (INT16_MAX >> 10)) {
+		if (depth == MAXDEPTH) {
+			tmp_value = search_seq(player, srchash, KILL_DEPTH + 2);
+			if(tmp_value) Preturn = KillReturn;
+			//extreme = tmp_value;
+			if (tmp_value)//> INT16_MAX >> 1)
+				return tmp_value;
+		}
 		if (depth == 1/*MAXDEPTH*/) {
 			tmp_value = search_seq(player, srchash, KILL_DEPTH);
 			//Preturn = KillReturn;
-			extreme = tmp_value;
-			if (tmp_value > INT16_MAX >> 1)
+			//extreme = tmp_value;
+			if (tmp_value)// > INT16_MAX >> 1)
 				return tmp_value;
 		}
 		if (depth == 0/*MAXDEPTH - 1*/) {
 			tmp_value = search_seq(!player, srchash, KILL_DEPTH);
-			extreme = -tmp_value;
-			if (tmp_value > INT16_MAX >> 1)
+			//extreme = -tmp_value;
+			if (tmp_value)// > INT16_MAX >> 1)
 				return -tmp_value;
 		}
 	}
@@ -365,6 +391,9 @@ int16_t search(uint8_t ab, int16_t AB, uint8_t depth, HASH srchash) {
 	return tmp_value;
 }
 
+/*
+	Prepare for the search.
+*/
 Point search_point(Point last) {
 	local_board = board;
 	local_PieceOnBoard = PieceOnBoard;
@@ -385,14 +414,14 @@ Point search_point(Point last) {
 	if (Round < 6) {
 		SCOPE = 1;
 		MAXDEPTH = 3;
-		WIDTH = 20;
+		WIDTH = 6;
 	}
 	else {
 		SCOPE = 2;
 		MAXDEPTH = 3;//PC_MAXDEPTH[player];
-		WIDTH = 10;
+		WIDTH = 8;
 	}
-	KILL_DEPTH = 8;
+	//KILL_DEPTH = 6;
 	search(1, INT16_MIN, MAXDEPTH, init_hash);
 	local_board.location[Preturn.x][Preturn.y] = player;
 	return Preturn;

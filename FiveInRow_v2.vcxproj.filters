@@ -53,5 +53,8 @@
     <ClInclude Include="five_type.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="five_search.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

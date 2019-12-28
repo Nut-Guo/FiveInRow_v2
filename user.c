@@ -8,6 +8,9 @@
 
 extern uint8_t verify_location(Point p);
 
+/*
+	Get a valid input.
+*/
 Point user(Point last)
 {
 	char x, y, tmpx, tmpn;

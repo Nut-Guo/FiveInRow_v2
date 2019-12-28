@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 /*
-	4 directions.
+	id in 4 directions.
 */
 typedef struct {
 	uint16_t id[4];
@@ -23,10 +23,16 @@ typedef struct {
 	uint8_t distance[2][4];
 }distance;
 
+/*
+	Distance to the 6 different forms.
+*/
 typedef struct {
 	uint8_t form[6];
 }Disvec;
 
+/*
+	Distance to four.
+*/
 const uint8_t dis2four[1024] = 
 {		
 	   10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
@@ -93,6 +99,9 @@ const uint8_t dis2four[1024] =
 	   20, 20
 };
 
+/*
+	Distance to 5.
+*/
 const uint8_t dis2five[1024] =
 {
 		10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
@@ -160,7 +169,9 @@ const uint8_t dis2five[1024] =
 };
 
 extern inline uint8_t verify_location(Point p);
-// move one step in the specific direction
+/*
+	Move one step in the specific direction
+*/
 extern inline void move(Point* p, uint8_t i, uint8_t j) {
 	(*p).x += dx[i] * direction[j];
 	(*p).y += dy[i] * direction[j];
@@ -168,7 +179,9 @@ extern inline void move(Point* p, uint8_t i, uint8_t j) {
 
 uint8_t len[2];
 uint16_t line[2];
-// look up the end in one direction.
+/*
+	Encode the line.
+*/
 inline uint16_t parse_line(Point p, uint8_t i, uint8_t color, Board *local_board) {// look up the end in one direction.
 	Point tmpp = p;
 	uint16_t line = 1;
@@ -189,7 +202,9 @@ inline uint16_t parse_line(Point p, uint8_t i, uint8_t color, Board *local_board
 	return line;
 }
 
-//The function that calls the former ones that to get the id.
+/*
+	Coding in the four directions form the id of a point.
+*/
 inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
 	uint8_t save = (*local_board).location[p.x][p.y];
 	(*local_board).location[p.x][p.y] = color;
@@ -201,7 +216,9 @@ inline pieceid lookup(Point p, uint8_t color, Board *local_board) {
 	return id;
 }
 
-//Translate id 2 distance
+/*
+	Look up the table to get the correspond distance in the four lines.
+*/
 inline distance id2dis(Point p, uint8_t color, Board *local_board) {
 	pieceid id = lookup(p, color,local_board);
 	distance dis;
@@ -212,6 +229,9 @@ inline distance id2dis(Point p, uint8_t color, Board *local_board) {
 	return dis;
 }
 
+/*
+	Get the smallest two distance.
+*/
 uint8_t mini[2];//store the min direction of 4 and 5;
 inline void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
 {
@@ -236,6 +256,9 @@ inline void selection_sort(uint8_t a[], uint8_t len, uint8_t id)
 	}
 }
 
+/*
+	Parse the distance to a vector, consists of distance to 5,4,34,44,33, and longline.
+*/
 extern inline Disvec getvec(Point p, uint8_t color, Board *local_board) {
 	distance dis = id2dis(p,color,local_board);
 	//sort the dis;

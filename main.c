@@ -8,17 +8,25 @@ char cwd[80];
 Point(*Input[])(Point last) = { user, search_point };
 void(*Play[])(Point(*P1)(Point last), Point(*P2)(Point last)) = { new_game, continue_game };
 extern uint32_t PC_MAXDEPTH[2];
-/*Start the game, choose the player and the mode.*/
+
+/*
+	Choose a search depth of PC, Optional, but a depth of 4 seems to be the best.
+*/
 void choose_depth(uint8_t i) {
 	printf("Please input the max selection depth between 1 and 5: ");
 	while (1) {
 		scanf_s("%d", &PC_MAXDEPTH[i]);
+		PC_MAXDEPTH[i] -= 1;
 		if (PC_MAXDEPTH[i] < 1 || PC_MAXDEPTH[i] >5) {
 			printf("Invalid value, try again!\n");
 		}
 		else return;
 	}
 }
+
+/*
+	Start the game, choose the player and the mode.
+*/
 void game(char mode)
 {
 	printf("USER(0)\tPC(1)\n");
@@ -42,7 +50,9 @@ void game(char mode)
 	(*Play[mode])(Input[player1 - '0'], Input[player2 - '0']);
 }
 
-/*The entry for a new game or the archive.*/
+/*
+	The entry for a new game or the archive.
+*/
 int main(int argc, char* argv[])
 {
 	char* receive = _getcwd(cwd, 80);

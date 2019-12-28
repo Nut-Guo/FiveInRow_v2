@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="five_func.h" />
     <ClInclude Include="five_global.h" />
+    <ClInclude Include="five_search.h" />
     <ClInclude Include="five_type.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
